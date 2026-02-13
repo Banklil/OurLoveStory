@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Love Story ❤️</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700&family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="VV.CSS">
+</head>
+<body>
+    <canvas id="heart-canvas"></canvas>
+
+    <div class="main-container">
+        
+        <div id="stage-envelope" class="stage">
+            <h1 class="title-anim">Happy Valentine's Day</h1>
+            <div class="envelope-wrapper" onclick="openEnvelope()">
+                <div class="envelope">
+                    <div class="flap"></div>
+                    <div class="pocket"></div>
+                    <div class="letter">
+                        <p>ເຖິງຄົນພິເສດ...</p>
+                        <p>ມີຄວາມລັບຊິບອກ<br>ກົດປຸ່ມທາງລຸ່ມເລີຍ 👇</p>
+                    </div>
+                    <div class="heart-seal">❤️</div>
+                </div>
+            </div>
+            <button id="start-btn" class="hidden-btn glow-btn" onclick="nextStage('#stage-envelope', '#stage-ask')">
+                ໄປເບິ່ງຄວາມລັບກັນ! 🚀
+            </button>
+        </div>
+
+        <div id="stage-ask" class="stage hidden">
+            <h2 class="typing-text">ພ້ອມຈະເບິ່ງເລື່ອງລາວຂອງເຮົາລະບໍ່?</h2>
+            <div class="btn-group" style="position: relative; height: 100px;"> <button onclick="nextStage('#stage-ask', '#stage-passcode')" class="yes-btn pulse-anim">ພ້ອມແລ້ວ! 🥰</button>
+                <button id="no-btn" class="no-btn" style="position: absolute;">ຍັງ...</button> </div>
+        </div>
+
+        <div id="stage-passcode" class="stage hidden">
+            <h2>ໃສ່ລະຫັດປົດລັອກຫົວໃຈ 🔒</h2>
+            <p class="sub-text">Hint: ວັນທີ່ເຮົາຄົບກັນ (ເຊັ່ນ: 1402)</p>
+            
+            <div class="passcode-dots">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            
+            <div class="keypad">
+                <button onclick="pressKey(1)">1</button><button onclick="pressKey(2)">2</button><button onclick="pressKey(3)">3</button>
+                <button onclick="pressKey(4)">4</button><button onclick="pressKey(5)">5</button><button onclick="pressKey(6)">6</button>
+                <button onclick="pressKey(7)">7</button><button onclick="pressKey(8)">8</button><button onclick="pressKey(9)">9</button>
+                <button class="empty"></button><button onclick="pressKey(0)">0</button><button onclick="clearKey()">⌫</button>
+            </div>
+        </div>
+
+        <div id="stage-timer" class="stage hidden">
+            <h2>ເຮົາຮັກກັນມາ...</h2>
+            <div class="timer-wrapper">
+                <div class="time-box"><span id="days">0</span><p>ມື້</p></div>
+                <div class="time-box"><span id="hours">0</span><p>ຊົ່ວໂມງ</p></div>
+                <div class="time-box"><span id="minutes">0</span><p>ນາທີ</p></div>
+                <div class="time-box"><span id="seconds">0</span><p>ວິນາທີ</p></div>
+            </div>
+            <p class="love-text">ແລະ ຈະຮັກຕະຫຼອດໄປ ❤️</p>
+            <button class="next-btn" onclick="loadGallery()">ເບິ່ງຮູບຂອງເຮົາ 📸</button>
+        </div>
+
+        <div id="stage-gallery" class="stage hidden">
+            <h2>Our Memories 📸</h2>
+            <p class="sub-text">(ປັດຮູບຖິ້ມເພື່ອເບິ່ງຮູບຕໍ່ໄປ)</p>
+            <div class="gallery-container">
+                </div>
+            <button id="btn-to-scratch" class="next-btn" style="margin-top: 400px; display: none;" onclick="nextStage('#stage-gallery', '#stage-scratch'); initScratch();">
+                ຍັງມີອີກຢ່າງໜຶ່ງ... 👉
+            </button>
+        </div>
+
+        <div id="stage-scratch" class="stage hidden">
+            <h2>ຂູດເພື່ອເບິ່ງຄວາມໃນໃຈ ✨</h2>
+            <div class="scratch-wrapper">
+                <div class="secret-msg">
+                    <h3>ຮັກທີ່ສຸດເລີຍ! 💖</h3>
+                    <p>ຂອບໃຈທີ່ເຂົ້າມາຕື່ມເຕັມຊີວິດເຄົ້ານະ</p>
+                    <p>Happy Valentine's Day!</p>
+                </div>
+                <canvas id="scratch-canvas"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="VV.JS"></script>
+</body>
+</html>
