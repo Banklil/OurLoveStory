@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700&family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="VV.CSS">
 </head>
 <body>
     <canvas id="heart-canvas"></canvas>
@@ -21,28 +21,28 @@
                     <div class="flap"></div>
                     <div class="pocket"></div>
                     <div class="letter">
-                        <p>ເຖິງຄົນພິເສດ...</p>
-                        <p>ມີຄວາມລັບຊິບອກ<br>ກົດປຸ່ມທາງລຸ່ມເລີຍ 👇</p>
+                        <p>DEAR CHI</p>
+                        <p>ເຂົາຢາກຈະພິສູດໃຫ້ເພີ່ນເຫັນນະວ່າເຂົາຮັກເພີ່ນຫຼາຍສຳໃດ ຢ່າເວົ້າວ່າຖີ້ມເຂົາຫຼາຍ<br>ມັນອາດຈະບໍ່ງາມທີ່ສຸດແຕ່ເຂົາເຮັດເຕັມທີ່ສຸດແລ້ວນະ</p>
                     </div>
                     <div class="heart-seal">❤️</div>
                 </div>
             </div>
             <button id="start-btn" class="hidden-btn glow-btn" onclick="nextStage('#stage-envelope', '#stage-ask')">
-                ໄປເບິ່ງຄວາມລັບກັນ! 🚀
+                I TO MEN
             </button>
         </div>
 
         <div id="stage-ask" class="stage hidden">
-            <h2 class="typing-text">ພ້ອມຈະເບິ່ງເລື່ອງລາວຂອງເຮົາລະບໍ່?</h2>
+            <h2 class="typing-text">CHI HUX BANK BOR??</h2>
             <div class="btn-group">
-                <button onclick="nextStage('#stage-ask', '#stage-passcode')" class="yes-btn pulse-anim">ພ້ອມແລ້ວ! 🥰</button>
-                <button id="no-btn" class="no-btn">ຍັງ...</button>
+                <button onclick="nextStage('#stage-ask', '#stage-passcode')" class="yes-btn pulse-anim">LOVE T SOUT 🥰</button>
+                <button id="no-btn" class="no-btn">BORHUX</button>
             </div>
         </div>
 
         <div id="stage-passcode" class="stage hidden">
-            <h2>ໃສ່ລະຫັດປົດລັອກຫົວໃຈ 🔒</h2>
-            <p class="sub-text">Hint: ວັນທີ່ເຮົາຄົບກັນ (ເຊັ່ນ: 1402)</p>
+            <h2>ລະຫັດເພີ່ນຮູ້ຢູ່ແລ້ວ</h2>
+            <p class="sub-text">ມາບອກຮັກລະຈະບອກເທື່ອລະໂຕ</p>
             <div class="passcode-dots">
                 <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
             </div>
@@ -55,19 +55,19 @@
         </div>
 
         <div id="stage-timer" class="stage hidden">
-            <h2>ເຮົາຮັກກັນມາ...</h2>
+            <h2>TIME</h2>
             <div class="timer-wrapper">
                 <div class="time-box"><span id="days">0</span><p>ມື້</p></div>
                 <div class="time-box"><span id="hours">0</span><p>ຊົ່ວໂມງ</p></div>
                 <div class="time-box"><span id="minutes">0</span><p>ນາທີ</p></div>
                 <div class="time-box"><span id="seconds">0</span><p>ວິນາທີ</p></div>
             </div>
-            <p class="love-text">ແລະ ຈະຮັກຕະຫຼອດໄປ ❤️</p>
-            <button class="next-btn" onclick="loadGallery()">ເບິ່ງຮູບຂອງເຮົາ 📸</button>
+            <p class="love-text">ແລະ ເວລາຫຍັງຮູ້ຢູ່ຕິ❤️</p>
+            <button class="next-btn" onclick="loadGallery()">LOVE</button>
         </div>
 
         <div id="stage-gallery" class="stage hidden">
-            <h2>Our Memories 📸</h2>
+            <h2>Memories 📸</h2>
             <p class="sub-text">(ປັດຮູບຊ້າຍ-ຂວາ ເພື່ອເບິ່ງຮູບຕໍ່ໄປ)</p>
             
             <div class="tinder-container">
@@ -76,17 +76,17 @@
             </div>
 
             <button id="btn-to-scratch" class="next-btn" style="display: none; margin-top: 20px;" onclick="goToScratch()">
-                ຍັງມີອີກຢ່າງໜຶ່ງ... 👉
+                NEXT
             </button>
         </div>
 
         <div id="stage-scratch" class="stage hidden">
-            <h2>ຂູດເພື່ອເບິ່ງຄວາມໃນໃຈ ✨</h2>
+            <h2>ຂູດສະໄອ້ເໝັນ</h2>
             <div class="scratch-wrapper">
                 <div class="secret-msg">
-                    <h3>ຮັກທີ່ສຸດເລີຍ! 💖</h3>
-                    <p>ຂອບໃຈທີ່ເຂົ້າມາເປັນສ່ວນໜຶ່ງໃນຊີວິດ</p>
-                    <p>Happy Valentine's Day!</p>
+                    <h3>BANK HUX CHI NER 💖</h3>
+                    <p>ຂອບໃຈທີ່ເພີ່ນທີ່ເຮັດໃຫ້ເຂົາປັບປ່ຽນແລະເປັນຄົນທີ່ດີຂື້ນເພີ່ນເຮັດໃຫ້ເຂົາຮູ້ສືກຢາກຮັກແລະຢາກເປັນຄົນທີ່ດີຢາກເປັນຄົນທີ່ເພີ່ນຮັກ ຢູ່ກັບເຂົາໄປດົນໆນະ</p>
+                    <p>ຂອບໃຈທີ່ເລືອກຟັງເຂົາໃນມື້ທີ່ເຂົາຂີ່ຈົມຂີ່ນອ້ຍໃຈ</p>
                 </div>
                 <canvas id="scratch-canvas"></canvas>
             </div>
@@ -97,6 +97,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
-    <script src="script.js"></script>
+    <script src="VV.JS"></script>
 </body>
 </html>
