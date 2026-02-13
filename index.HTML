@@ -2,12 +2,12 @@
 <html lang="lo">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Our Love Story ❤️</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700&family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="VV.CSS">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <canvas id="heart-canvas"></canvas>
@@ -34,18 +34,18 @@
 
         <div id="stage-ask" class="stage hidden">
             <h2 class="typing-text">ພ້ອມຈະເບິ່ງເລື່ອງລາວຂອງເຮົາລະບໍ່?</h2>
-            <div class="btn-group" style="position: relative; height: 100px;"> <button onclick="nextStage('#stage-ask', '#stage-passcode')" class="yes-btn pulse-anim">ພ້ອມແລ້ວ! 🥰</button>
-                <button id="no-btn" class="no-btn" style="position: absolute;">ຍັງ...</button> </div>
+            <div class="btn-group" style="position: relative; height: 100px; width: 250px;">
+                <button onclick="nextStage('#stage-ask', '#stage-passcode')" class="yes-btn pulse-anim">ພ້ອມແລ້ວ! 🥰</button>
+                <button id="no-btn" class="no-btn" style="position: absolute;">ຍັງ...</button>
+            </div>
         </div>
 
         <div id="stage-passcode" class="stage hidden">
             <h2>ໃສ່ລະຫັດປົດລັອກຫົວໃຈ 🔒</h2>
             <p class="sub-text">Hint: ວັນທີ່ເຮົາຄົບກັນ (ເຊັ່ນ: 1402)</p>
-            
             <div class="passcode-dots">
                 <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
             </div>
-            
             <div class="keypad">
                 <button onclick="pressKey(1)">1</button><button onclick="pressKey(2)">2</button><button onclick="pressKey(3)">3</button>
                 <button onclick="pressKey(4)">4</button><button onclick="pressKey(5)">5</button><button onclick="pressKey(6)">6</button>
@@ -68,10 +68,14 @@
 
         <div id="stage-gallery" class="stage hidden">
             <h2>Our Memories 📸</h2>
-            <p class="sub-text">(ປັດຮູບຖິ້ມເພື່ອເບິ່ງຮູບຕໍ່ໄປ)</p>
-            <div class="gallery-container">
-                </div>
-            <button id="btn-to-scratch" class="next-btn" style="margin-top: 400px; display: none;" onclick="nextStage('#stage-gallery', '#stage-scratch'); initScratch();">
+            <p class="sub-text">(ປັດຮູບຊ້າຍ-ຂວາ ເພື່ອເບິ່ງຮູບຕໍ່ໄປ)</p>
+            
+            <div class="tinder-container">
+                <div class="tinder-cards">
+                    </div>
+            </div>
+
+            <button id="btn-to-scratch" class="next-btn" style="display: none;" onclick="nextStage('#stage-gallery', '#stage-scratch'); initScratch();">
                 ຍັງມີອີກຢ່າງໜຶ່ງ... 👉
             </button>
         </div>
@@ -91,8 +95,8 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="VV.JS"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
