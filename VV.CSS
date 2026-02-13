@@ -2,20 +2,21 @@
     --primary: #ff3366;
     --secondary: #ff85a2;
     --bg-gradient: radial-gradient(circle, #ffdde1, #ee9ca7);
-    --glass: rgba(255, 255, 255, 0.25);
 }
 
+* { box-sizing: border-box; }
+
 body {
-    margin: 0; height: 100vh; overflow: hidden;
+    margin: 0; padding: 0; height: 100vh; overflow: hidden;
     background: var(--bg-gradient);
-    /* ປ້ອງກັນການເລື່ອນໜ້າຈໍໃນມືຖື ເພື່ອໃຫ້ປັດຮູບໄດ້ສະດວກ */
+    /* ຫ້າມເລື່ອນໜ້າຈໍໃນມືຖື ເພື່ອໃຫ້ປັດຮູບໄດ້ງ່າຍ */
     touch-action: none; 
     font-family: 'Noto Sans Lao', 'Poppins', sans-serif;
     display: flex; justify-content: center; align-items: center;
     color: #590d22;
 }
 
-#heart-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+#heart-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
 
 .main-container { width: 100%; max-width: 420px; height: 100vh; position: relative; }
 
@@ -23,19 +24,17 @@ body {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     text-align: center;
-    backdrop-filter: blur(5px);
-    /* ປ້ອງກັນບໍ່ໃຫ້ select ຕົວໜັງສືຕອນກຳລັງປັດ */
     user-select: none;
 }
-.hidden { display: none; opacity: 0; pointer-events: none; }
+.hidden { display: none !important; opacity: 0; pointer-events: none; }
 
-/* 1. Envelope Animation */
+/* Envelope */
 .envelope-wrapper { cursor: pointer; transform: scale(0.9); transition: 0.3s; margin: 30px 0; }
 .envelope-wrapper:hover { transform: scale(0.95); }
 .envelope { position: relative; width: 300px; height: 200px; background: var(--primary); border-radius: 0 0 15px 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
 .flap { position: absolute; top: 0; left: 0; width: 0; height: 0; border-left: 150px solid transparent; border-right: 150px solid transparent; border-top: 150px solid #ff5c8d; transform-origin: top; transition: 0.8s ease-in-out; z-index: 4; }
 .pocket { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: var(--primary); clip-path: polygon(0 0, 50% 40%, 100% 0, 100% 100%, 0 100%); z-index: 3; border-radius: 0 0 15px 15px; }
-.letter { position: absolute; width: 90%; height: 90%; background: white; top: 5%; left: 5%; border-radius: 5px; z-index: 2; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.8s ease-in-out; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+.letter { position: absolute; width: 90%; height: 90%; background: white; top: 5%; left: 5%; border-radius: 5px; z-index: 2; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.8s ease-in-out; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 .open .flap { transform: rotateX(180deg); z-index: 1; }
 .open .letter { transform: translateY(-120px) rotate(-2deg); z-index: 5; }
 .heart-seal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; z-index: 5; transition: 0.5s; }
@@ -43,12 +42,13 @@ body {
 
 /* Buttons */
 button { font-family: 'Noto Sans Lao', sans-serif; cursor: pointer; border: none; outline: none; }
-.glow-btn { padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; background: white; color: var(--primary); box-shadow: 0 0 15px rgba(255, 51, 102, 0.5); animation: glow 2s infinite alternate; }
+.glow-btn { padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; background: white; color: var(--primary); box-shadow: 0 0 15px rgba(255, 51, 102, 0.5); animation: glow 2s infinite alternate; margin-top: 20px;}
 @keyframes glow { from { box-shadow: 0 0 10px rgba(255, 51, 102, 0.5); } to { box-shadow: 0 0 25px rgba(255, 51, 102, 0.9); } }
 .yes-btn { background: #28a745; color: white; padding: 12px 30px; border-radius: 30px; font-size: 1.2rem; z-index: 10; position: relative;}
-.no-btn { background: #dc3545; color: white; padding: 12px 20px; border-radius: 30px; font-size: 1rem; position: absolute; }
+.no-btn { background: #dc3545; color: white; padding: 12px 20px; border-radius: 30px; font-size: 1rem; position: absolute; top: 10px; left: 10px;}
 .pulse-anim { animation: pulse 1.5s infinite; }
 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+.next-btn { background: white; color: var(--primary); padding: 12px 30px; border-radius: 30px; font-weight: bold; margin-top: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
 /* Passcode */
 .passcode-dots { display: flex; gap: 15px; margin: 30px 0; }
@@ -64,25 +64,26 @@ button { font-family: 'Noto Sans Lao', sans-serif; cursor: pointer; border: none
 .time-box span { font-size: 1.5rem; font-weight: bold; color: var(--primary); display: block; }
 .time-box p { font-size: 0.8rem; margin: 0; color: #888; }
 
-/* Gallery (ສ່ວນສຳຄັນສຳລັບການປັດຮູບ) */
-.gallery-container { position: relative; width: 300px; height: 400px; margin-top: 20px; perspective: 1000px; }
-.polaroid {
-    position: absolute; width: 280px; padding: 10px; padding-bottom: 50px;
-    background: white; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    border-radius: 5px; top: 0; left: 10px; 
-    /* ຄຳສັ່ງສຳຄັນ: ບອກ Browser ວ່າຢ່າຫຍຸ້ງກັບການທັດຊ໌ໃນຮູບນີ້ */
-    touch-action: none; 
-    cursor: grab;
-    will-change: transform; /* ເພີ່ມປະສິດທິພາບການເຄື່ອນໄຫວ */
+/* === Tinder Cards (Gallery) === */
+.tinder-container {
+    width: 280px;
+    height: 380px;
+    position: relative;
+    margin: 10px auto;
 }
-.polaroid:active { cursor: grabbing; }
-.polaroid img { width: 100%; border-radius: 3px; pointer-events: none; /* ປ້ອງກັນບໍ່ໃຫ້ກົດ Save ຮູບຕອນລາກ */ }
+.tinder-cards { width: 100%; height: 100%; position: relative; }
+.tinder-card {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: white; padding: 10px; padding-bottom: 50px;
+    border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    display: flex; justify-content: center; align-items: center;
+    touch-action: none; cursor: grab;
+    will-change: transform;
+}
+.tinder-card img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; pointer-events: none; }
 
 /* Scratch Card */
 .scratch-wrapper { position: relative; width: 300px; height: 160px; margin-top: 20px; }
-.secret-msg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; border-radius: 15px; border: 3px dashed var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1; }
+.secret-msg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; border-radius: 15px; border: 3px dashed var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1; padding: 10px;}
 canvas#scratch-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; border-radius: 15px; cursor: crosshair; touch-action: none; }
-
-.hidden-btn { display: none; margin-top: 20px; }
-.next-btn { background: white; color: var(--primary); padding: 10px 25px; border-radius: 30px; font-weight: bold; margin-top: 20px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); cursor: pointer;}
-.sub-text { font-size: 0.9rem; color: rgba(89, 13, 34, 0.7); }
+.sub-text { font-size: 0.9rem; color: rgba(89, 13, 34, 0.7); margin-bottom: 10px;}

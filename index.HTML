@@ -34,7 +34,7 @@
 
         <div id="stage-ask" class="stage hidden">
             <h2 class="typing-text">ພ້ອມຈະເບິ່ງເລື່ອງລາວຂອງເຮົາລະບໍ່?</h2>
-            <div class="btn-group" style="position: relative; height: 100px; width: 250px;">
+            <div class="btn-group" style="position: relative; height: 120px; width: 280px; display: flex; justify-content: center; align-items: center;">
                 <button onclick="nextStage('#stage-ask', '#stage-passcode')" class="yes-btn pulse-anim">ພ້ອມແລ້ວ! 🥰</button>
                 <button id="no-btn" class="no-btn" style="position: absolute;">ຍັງ...</button>
             </div>
@@ -71,11 +71,11 @@
             <p class="sub-text">(ປັດຮູບຊ້າຍ-ຂວາ ເພື່ອເບິ່ງຮູບຕໍ່ໄປ)</p>
             
             <div class="tinder-container">
-                <div class="tinder-cards">
+                <div class="tinder-cards" id="tinder-cards">
                     </div>
             </div>
 
-            <button id="btn-to-scratch" class="next-btn" style="display: none;" onclick="nextStage('#stage-gallery', '#stage-scratch'); initScratch();">
+            <button id="btn-to-scratch" class="next-btn" style="display: none; margin-top: 20px;" onclick="nextStage('#stage-gallery', '#stage-scratch'); initScratch();">
                 ຍັງມີອີກຢ່າງໜຶ່ງ... 👉
             </button>
         </div>
@@ -85,7 +85,7 @@
             <div class="scratch-wrapper">
                 <div class="secret-msg">
                     <h3>ຮັກທີ່ສຸດເລີຍ! 💖</h3>
-                    <p>ຂອບໃຈທີ່ເຂົ້າມາຕື່ມເຕັມຊີວິດເຄົ້ານະ</p>
+                    <p>ຂອບໃຈທີ່ເຂົ້າມາເປັນສ່ວນໜຶ່ງໃນຊີວິດ</p>
                     <p>Happy Valentine's Day!</p>
                 </div>
                 <canvas id="scratch-canvas"></canvas>
@@ -97,6 +97,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
-    <script src="VV.CSS"></script>
+    <script src="VV.JS"></script>
 </body>
 </html>
