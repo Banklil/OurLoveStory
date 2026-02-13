@@ -1,12 +1,13 @@
 // ==================== 1. ຕັ້ງຄ່າຂໍ້ມູນ ====================
 const CONFIG = {
     passcode: "1402",
-    startDate: "2026-01-31", // ວັນທີ່ເລີ່ມຄົບ
+    startDate: "2026-01-31", // ຕັ້ງວັນທີຍ້ອນຫຼັງຕາມຕ້ອງການ
     photos: [
         "cc1.jpeg",
         "cc2.jpeg",
         "cc3.jpeg",
         "cc4.jpeg"
+        // ໃສ່ຮູບເພີ່ມໄດ້ຕາມສະບາຍ
     ]
 };
 
@@ -26,28 +27,31 @@ animateHearts();
 
 // ==================== 3. Stage Management ====================
 function nextStage(hideId, showId) {
-    const hideEl = document.querySelector(hideId);
-    const showEl = document.querySelector(showId);
-    
-    hideEl.classList.add('hidden');
-    showEl.classList.remove('hidden');
-    gsap.fromTo(showEl, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5 });
+    gsap.to(hideId, { opacity: 0, scale: 0.8, duration: 0.5, onComplete: () => {
+        document.querySelector(hideId).classList.add('hidden');
+        const next = document.querySelector(showId);
+        next.classList.remove('hidden');
+        gsap.fromTo(next, { opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.5 });
+    }});
 }
 
 // Stage 1: Envelope
 function openEnvelope() {
     document.querySelector('.envelope-wrapper').classList.add('open');
     setTimeout(() => {
-        document.getElementById('start-btn').style.display = "block";
+        const btn = document.getElementById('start-btn');
+        btn.style.display = "block";
+        gsap.from(btn, { y: 20, opacity: 0, duration: 0.5 });
     }, 800);
 }
 
-// Stage 2: Ask Button (ແລ່ນໜີ)
+// Stage 2: Ask Button (ແກ້ໄຂໃຫ້ແລ່ນໜີໃນມືຖື)
 const noBtn = document.getElementById('no-btn');
 function runAway(e) {
     if(e) e.preventDefault();
-    const newX = (Math.random() - 0.5) * 150;
-    const newY = (Math.random() - 0.5) * 80;
+    const containerW = 200; const containerH = 100;
+    const newX = (Math.random() - 0.5) * containerW;
+    const newY = (Math.random() - 0.5) * containerH;
     gsap.to(noBtn, { x: newX, y: newY, duration: 0.2, ease: "power2.out" });
 }
 noBtn.addEventListener('mouseenter', runAway);
@@ -61,7 +65,7 @@ function updateDots() { document.querySelectorAll('.dot').forEach((dot, i) => { 
 function checkPass() {
     if (inputPass === CONFIG.passcode) {
         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        setTimeout(() => { nextStage('#stage-passcode', '#stage-timer'); startTimer(); }, 800);
+        setTimeout(() => { nextStage('#stage-passcode', '#stage-timer'); startTimer(); }, 1000);
     } else {
         gsap.to('.passcode-dots', { x: 10, duration: 0.1, yoyo: true, repeat: 5 }); inputPass = ""; setTimeout(updateDots, 500);
     }
@@ -79,92 +83,106 @@ function startTimer() {
     }, 1000);
 }
 
-// ==================== Stage 5: Swipeable Gallery (Tinder Style) ====================
+// Stage 5: Gallery (ລະບົບປັດຮູບ Tinder-style)
+let cardsRemaining = CONFIG.photos.length;
+
 function loadGallery() {
     nextStage('#stage-timer', '#stage-gallery');
-    initCards();
-}
+    const container = document.querySelector('.gallery-container');
+    container.innerHTML = ''; // ລ້າງຂອງເກົ່າ
+    cardsRemaining = CONFIG.photos.length;
 
-function initCards() {
-    const cardsContainer = document.querySelector('.tinder-cards');
-    cardsContainer.innerHTML = '';
-    
-    // ສ້າງຮູບ (ຫຼັງມາໜ້າ) ເພື່ອໃຫ້ຮູບທຳອິດຢູ່ເທິງ
-    const reversedPhotos = [...CONFIG.photos].reverse();
-    
-    reversedPhotos.forEach((url, index) => {
-        const card = document.createElement('div');
-        card.classList.add('tinder-card');
-        card.innerHTML = `<img src="${url}">`;
+    // ສ້າງຮູບຈາກຫຼັງມາໜ້າ ເພື່ອໃຫ້ຮູບທຳອິດຢູ່ເທິງສຸດ
+    [...CONFIG.photos].reverse().forEach((url, i) => {
+        const actualIndex = CONFIG.photos.length - 1 - i;
+        const div = document.createElement('div');
+        div.className = 'polaroid';
         
-        // Random ມຸມອຽງນ້ອຍໆ
-        const randomRot = (Math.random() - 0.5) * 10;
-        card.style.transform = `rotate(${randomRot}deg)`;
-        card.dataset.rot = randomRot; // ເກັບຄ່າໄວ້
+        // ເກັບຄ່າ rotation ເບື້ອງຕົ້ນໄວ້ໃນ data attribute
+        const baseRotation = (Math.random() - 0.5) * 10;
+        div.dataset.baseRotation = baseRotation;
         
-        cardsContainer.appendChild(card);
+        div.style.zIndex = i; // ຮູບທຳອິດ (index 0) ຈະມີ z-index ສູງສຸດ
+        div.innerHTML = `<img src="${url}" draggable="false">`;
+        container.appendChild(div);
+
+        // Animation ຕອນຮູບເຂົ້າມາ
+        gsap.fromTo(div, 
+            { y: -1000, rotation: baseRotation + (Math.random()-0.5)*60, opacity: 0 },
+            { y: 0, rotation: baseRotation, opacity: 1, duration: 0.8, delay: actualIndex * 0.2, ease: "back.out(0.8)" }
+        );
     });
 
-    // ເລີ່ມຕົ້ນລະບົບປັດໃຫ້ຮູບເທິງສຸດ
-    setupTopCard();
+    // ລໍຖ້າໃຫ້ຮູບມາຄົບແລ້ວຈຶ່ງໃສ່ລະບົບປັດ
+    setTimeout(initSwipeableCards, CONFIG.photos.length * 200 + 800);
 }
 
-function setupTopCard() {
-    const cards = document.querySelectorAll('.tinder-card:not(.removed)');
-    if (cards.length === 0) {
-        // ຖ້າປັດໝົດແລ້ວ ໂຊປຸ່ມໄປຕໍ່
-        document.getElementById('btn-to-scratch').style.display = 'block';
-        return;
-    }
-
-    // ເລືອກຮູບທີ່ຢູ່ເທິງສຸດ (ໂຕສຸດທ້າຍໃນ NodeList)
+function initSwipeableCards() {
+    const cards = Array.from(document.querySelectorAll('.polaroid'));
+    // ໃຫ້ປັດໄດ້ສະເພາະຮູບທີ່ຢູ່ເທິງສຸດເທົ່ານັ້ນ
     const topCard = cards[cards.length - 1];
-    
-    // ໃຊ້ Hammer.js ຈັດການການປັດ (Swipe/Pan)
-    const hammer = new Hammer(topCard);
-    
-    hammer.on('pan', function (event) {
-        topCard.classList.add('moving');
-        // ລາກໄປທາງໃດ ໃຫ້ຮູບຍ້າຍ ແລະ ໝຸນຕາມນັ້ນ
-        const xMulti = event.deltaX * 0.05;
-        const yMulti = event.deltaY / 80;
-        const rotate = xMulti * yMulti + parseFloat(topCard.dataset.rot);
 
-        topCard.style.transform = `translate(${event.deltaX}px, ${event.deltaY}px) rotate(${rotate}deg)`;
-    });
+    if (!topCard) return; // ຖ້າບໍ່ມີຮູບແລ້ວ ກໍອອກໄປ
 
-    hammer.on('panend', function (event) {
-        topCard.classList.remove('moving');
-        
-        // ຖ້າປັດໄປໄກກວ່າ 100px (ຊ້າຍ ຫຼື ຂວາ) ຖືວ່າປັດອອກ
-        const keep = Math.abs(event.deltaX) < 100;
-        
-        if (keep) {
-            // ເດັ້ງກັບມາບ່ອນເກົ່າ
-            topCard.style.transform = `rotate(${topCard.dataset.rot}deg)`;
-        } else {
-            // ປິວອອກໄປນອກຈໍ
-            const endX = Math.max(Math.abs(event.velocityX) * 1000, 1000);
-            const toX = event.deltaX > 0 ? endX : -endX;
-            const endY = Math.abs(event.velocityY) * 1000;
-            const toY = event.deltaY > 0 ? endY : -endY;
-            
-            topCard.style.transition = 'transform 0.5s ease-out';
-            topCard.style.transform = `translate(${toX}px, ${toY + event.deltaY}px)`;
-            
-            topCard.classList.add('removed');
-            
-            // ລຶບ Event ແລ້ວຕັ້ງຄ່າໃຫ້ຮູບຕໍ່ໄປ
-            setTimeout(() => {
-                topCard.remove();
-                setupTopCard();
-            }, 500);
+    Draggable.create(topCard, {
+        type: "x,y",
+        edgeResistance: 0.7,
+        bounds: window,
+        zIndexBoost: false, // ບໍ່ຕ້ອງເພີ່ມ z-index ຕອນລາກ
+        onDrag: function() {
+            // ໝຸນຮູບຕາມທິດທາງທີ່ລາກ
+            const rotation = parseFloat(this.target.dataset.baseRotation) + (this.x * 0.05);
+            gsap.set(this.target, { rotation: rotation });
+        },
+        onDragEnd: function() {
+            const threshold = 100; // ໄລຍະທາງທີ່ຕ້ອງລາກເກີນເພື່ອໃຫ້ປັດອອກ
+            const currentRotation = parseFloat(this.target.dataset.baseRotation);
+
+            // ຖ້າລາກໄປຊ້າຍ ຫຼື ຂວາ ໄກພໍ
+            if (Math.abs(this.x) > threshold) {
+                const direction = this.x > 0 ? 1 : -1; // 1=ຂວາ, -1=ຊ້າຍ
+                const screenW = window.innerWidth;
+
+                // Animation ປັດຮູບອອກໄປນອກຈໍ
+                gsap.to(this.target, {
+                    x: direction * (screenW + 200),
+                    y: this.y + (Math.random() - 0.5) * 200,
+                    rotation: currentRotation + (direction * 45),
+                    opacity: 0,
+                    duration: 0.5,
+                    ease: "power1.in",
+                    onComplete: () => {
+                        this.target.remove(); // ລຶບຮູບອອກຈາກ DOM
+                        cardsRemaining--;
+                        this.kill(); // ຢຸດ Draggable ຂອງຮູບນີ້
+
+                        // ຖ້າຮູບໝົດແລ້ວ ໂຊປຸ່ມໄປຕໍ່
+                        if (cardsRemaining === 0) {
+                            const btn = document.getElementById('btn-to-scratch');
+                            btn.style.display = 'block';
+                            gsap.from(btn, { opacity: 0, y: 20, duration: 0.5 });
+                        } else {
+                            // ຖ້າຍັງມີຮູບ ໃຫ້ initialize ຮູບຕໍ່ໄປໃຫ້ປັດໄດ້
+                            initSwipeableCards();
+                        }
+                    }
+                });
+            } else {
+                // ຖ້າລາກບໍ່ໄກພໍ ໃຫ້ເດັ້ງກັບມາບ່ອນເກົ່າ
+                gsap.to(this.target, {
+                    x: 0,
+                    y: 0,
+                    rotation: currentRotation,
+                    duration: 0.4,
+                    ease: "back.out(1.5)"
+                });
+            }
         }
     });
 }
 
 
-// ==================== Stage 6: Scratch Card ====================
+// Stage 6: Scratch Card
 const scCanvas = document.getElementById('scratch-canvas');
 const scCtx = scCanvas.getContext('2d');
 const scWrapper = document.querySelector('.scratch-wrapper');
@@ -182,9 +200,11 @@ function scratch(x, y) {
     scCtx.beginPath(); scCtx.arc(x, y, 20, 0, Math.PI * 2); scCtx.fill();
     if(Math.random() > 0.98) confetti({ particleCount: 15, spread: 40, origin: { y: 0.8 } });
 }
+// Mouse Events
 scCanvas.addEventListener('mousedown', () => isDrawing = true);
 scCanvas.addEventListener('mouseup', () => isDrawing = false);
 scCanvas.addEventListener('mousemove', (e) => { if (!isDrawing) return; const rect = scCanvas.getBoundingClientRect(); scratch(e.clientX - rect.left, e.clientY - rect.top); });
+// Touch Events (ແກ້ໄຂໃຫ້ຂູດໄດ້ໃນມືຖື)
 scCanvas.addEventListener('touchstart', (e) => { isDrawing = true; e.preventDefault(); });
 scCanvas.addEventListener('touchend', () => isDrawing = false);
 scCanvas.addEventListener('touchmove', (e) => {
