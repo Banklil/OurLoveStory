@@ -1,0 +1,105 @@
+:root {
+    --primary: #ff3366;
+    --secondary: #ff85a2;
+    --bg-gradient: radial-gradient(circle, #ffdde1, #ee9ca7);
+    --glass: rgba(255, 255, 255, 0.25);
+}
+
+body {
+    margin: 0; height: 100vh; overflow: hidden;
+    background: var(--bg-gradient);
+    font-family: 'Noto Sans Lao', 'Poppins', sans-serif;
+    display: flex; justify-content: center; align-items: center;
+    color: #590d22;
+}
+
+#heart-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+
+.main-container { width: 100%; max-width: 420px; height: 100vh; position: relative; }
+
+.stage {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+    backdrop-filter: blur(5px);
+}
+.hidden { display: none; opacity: 0; }
+
+/* 1. Envelope Animation */
+.envelope-wrapper { cursor: pointer; transform: scale(0.9); transition: 0.3s; margin: 30px 0; }
+.envelope-wrapper:hover { transform: scale(0.95); }
+.envelope { position: relative; width: 300px; height: 200px; background: var(--primary); border-radius: 0 0 15px 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+.flap { 
+    position: absolute; top: 0; left: 0; width: 0; height: 0; 
+    border-left: 150px solid transparent; border-right: 150px solid transparent; 
+    border-top: 150px solid #ff5c8d; transform-origin: top; 
+    transition: 0.8s ease-in-out; z-index: 4; 
+}
+.pocket { 
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; 
+    background: var(--primary); clip-path: polygon(0 0, 50% 40%, 100% 0, 100% 100%, 0 100%); 
+    z-index: 3; border-radius: 0 0 15px 15px; 
+}
+.letter { 
+    position: absolute; width: 90%; height: 90%; background: white; top: 5%; left: 5%; 
+    border-radius: 5px; z-index: 2; padding: 15px; box-sizing: border-box; 
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    transition: 0.8s ease-in-out; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.open .flap { transform: rotateX(180deg); z-index: 1; }
+.open .letter { transform: translateY(-120px) rotate(-2deg); z-index: 5; }
+.heart-seal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; z-index: 5; transition: 0.5s; }
+.open .heart-seal { opacity: 0; transform: scale(2); }
+
+/* Buttons */
+button { font-family: 'Noto Sans Lao', sans-serif; cursor: pointer; border: none; outline: none; }
+.glow-btn {
+    padding: 15px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: bold;
+    background: white; color: var(--primary);
+    box-shadow: 0 0 15px rgba(255, 51, 102, 0.5);
+    animation: glow 2s infinite alternate;
+}
+@keyframes glow { from { box-shadow: 0 0 10px rgba(255, 51, 102, 0.5); } to { box-shadow: 0 0 25px rgba(255, 51, 102, 0.9); } }
+
+.yes-btn { background: #28a745; color: white; padding: 12px 30px; border-radius: 30px; font-size: 1.2rem; }
+.no-btn { background: #dc3545; color: white; padding: 12px 20px; border-radius: 30px; font-size: 1rem; }
+.pulse-anim { animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+/* Passcode */
+.passcode-dots { display: flex; gap: 15px; margin: 30px 0; }
+.dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid white; background: rgba(255,255,255,0.3); transition: 0.3s; }
+.dot.active { background: white; transform: scale(1.2); }
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+.keypad button { width: 70px; height: 70px; border-radius: 50%; background: rgba(255,255,255,0.4); font-size: 1.5rem; color: white; transition: 0.2s; }
+.keypad button:active { background: white; color: var(--primary); }
+
+/* Timer */
+.timer-wrapper { display: flex; gap: 10px; margin: 20px 0; }
+.time-box { background: white; padding: 10px; border-radius: 10px; min-width: 65px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+.time-box span { font-size: 1.5rem; font-weight: bold; color: var(--primary); display: block; }
+.time-box p { font-size: 0.8rem; margin: 0; color: #888; }
+
+/* Gallery */
+.gallery-container { position: relative; width: 300px; height: 400px; margin-top: 20px; }
+.polaroid {
+    position: absolute; width: 280px; padding: 10px; padding-bottom: 50px;
+    background: white; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    transform: rotate(var(--r)); border-radius: 5px;
+    top: 0; left: 10px; transition: transform 0.5s;
+}
+.polaroid:hover { transform: scale(1.1) rotate(0deg) !important; z-index: 100 !important; }
+.polaroid img { width: 100%; border-radius: 3px; }
+
+/* Scratch Card */
+.scratch-wrapper { position: relative; width: 300px; height: 160px; margin-top: 20px; }
+.secret-msg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: white; border-radius: 15px; border: 3px dashed var(--primary);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    z-index: 1;
+}
+canvas#scratch-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; border-radius: 15px; cursor: pointer; }
+
+.hidden-btn { display: none; margin-top: 20px; }
+.next-btn { background: white; color: var(--primary); padding: 10px 25px; border-radius: 30px; font-weight: bold; margin-top: 20px; }
