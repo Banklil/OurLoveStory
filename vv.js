@@ -24,7 +24,7 @@ class Heart {
     }
     update() { 
         this.y -= this.speed; 
-        this.x += Math.sin(this.y / 50) * 0.5; // ເຮັດໃຫ້ຫົວໃຈລອຍແກວ່ງໄປມາງາມໆ
+        this.x += Math.sin(this.y / 50) * 0.5;
         if (this.y < -50) {
             this.y = cvs.height + 50;
             this.x = Math.random() * cvs.width;
@@ -35,7 +35,6 @@ class Heart {
         ctx.translate(this.x, this.y);
         ctx.scale(this.size, this.size);
         ctx.fillStyle = `rgba(255, 51, 102, ${this.opacity})`; 
-        
         ctx.beginPath();
         ctx.moveTo(0, -5);
         ctx.bezierCurveTo(0, -15, -15, -15, -15, -5);
