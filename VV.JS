@@ -1,11 +1,12 @@
 // ==================== 1. ຕັ້ງຄ່າຂໍ້ມູນ ແລະ Supabase ====================
+// ລິ້ງ ແລະ ລະຫັດ API ຂອງເຈົ້າ (Supabase) ທີ່ເຊື່ອມຕໍ່ແລ້ວ!
 const supabaseUrl = 'https://fxhmjhwhpbvtflrhsofq.supabase.co'; 
 const supabaseKey = 'sb_publishable_sEN55L7TBNlWnsXd3_cnfg_6t3_p0w9'; 
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 const CONFIG = {
-    passcode: "1402",
-    startDate: "2025-01-10"
+    passcode: "1402", // ລະຫັດປົດລັອກ (1402)
+    startDate: "2025-01-10" // ວັນທີ 10/01/2025
 };
 
 // ==================== 2. Background Hearts ====================
@@ -14,15 +15,32 @@ const ctx = cvs.getContext('2d');
 cvs.width = window.innerWidth; cvs.height = window.innerHeight;
 let hearts = [];
 class Heart {
-    constructor() { this.x = Math.random() * cvs.width; this.y = cvs.height + Math.random() * 100; this.size = Math.random() * 15 + 5; this.speed = Math.random() * 2 + 1; this.opacity = Math.random() * 0.5 + 0.3; }
-    update() { this.y -= this.speed; if (this.y < -50) this.y = cvs.height + 50; }
-    draw() { ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`; ctx.font = `${this.size}px Arial`; ctx.fillText("❤️", this.x, this.y); }
+    constructor() { 
+        this.x = Math.random() * cvs.width; 
+        this.y = cvs.height + Math.random() * 100; 
+        this.size = Math.random() * 15 + 5; 
+        this.speed = Math.random() * 2 + 1; 
+        this.opacity = Math.random() * 0.5 + 0.3; 
+    }
+    update() { 
+        this.y -= this.speed; 
+        if (this.y < -50) this.y = cvs.height + 50; 
+    }
+    draw() { 
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`; 
+        ctx.font = `${this.size}px Arial`; 
+        ctx.fillText("❤️", this.x, this.y); 
+    }
 }
 for (let i = 0; i < 50; i++) hearts.push(new Heart());
-function animateHearts() { ctx.clearRect(0, 0, cvs.width, cvs.height); hearts.forEach(h => { h.update(); h.draw(); }); requestAnimationFrame(animateHearts); }
+function animateHearts() { 
+    ctx.clearRect(0, 0, cvs.width, cvs.height); 
+    hearts.forEach(h => { h.update(); h.draw(); }); 
+    requestAnimationFrame(animateHearts); 
+}
 animateHearts();
 
-// ==================== 3. Stage Management ====================
+// ==================== 3. Stage Management (ປ່ຽນໜ້າ) ====================
 function nextStage(hideId, showId, onCompleteCallback) {
     const hideEl = document.querySelector(hideId);
     const showEl = document.querySelector(showId);
@@ -35,14 +53,18 @@ function nextStage(hideId, showId, onCompleteCallback) {
 
 function openEnvelope() {
     document.querySelector('.envelope-wrapper').classList.add('open');
-    setTimeout(() => { document.getElementById('start-btn').style.display = "block"; gsap.from('#start-btn', { y: 20, opacity: 0, duration: 0.5 }); }, 800);
+    setTimeout(() => { 
+        document.getElementById('start-btn').style.display = "block"; 
+        gsap.from('#start-btn', { y: 20, opacity: 0, duration: 0.5 }); 
+    }, 800);
 }
 
 // ==================== Stage 2: ປຸ່ມ No ແລ່ນໜີ ====================
 const noBtn = document.getElementById('no-btn');
 function runAway(e) {
     if(e) e.preventDefault();
-    const newX = (Math.random() - 0.5) * 150; const newY = (Math.random() - 0.5) * 150;
+    const newX = (Math.random() - 0.5) * 150; 
+    const newY = (Math.random() - 0.5) * 150;
     gsap.to(noBtn, { x: newX, y: newY, duration: 0.2, ease: "power2.out" });
 }
 noBtn.addEventListener('touchstart', runAway, {passive: false});
@@ -50,15 +72,28 @@ noBtn.addEventListener('mouseenter', runAway);
 
 // ==================== Stage 3: Passcode ====================
 let inputPass = "";
-function pressKey(num) { if (inputPass.length < 4) { inputPass += num; updateDots(); if (inputPass.length === 4) checkPass(); } }
+function pressKey(num) { 
+    if (inputPass.length < 4) { 
+        inputPass += num; 
+        updateDots(); 
+        if (inputPass.length === 4) checkPass(); 
+    } 
+}
 function clearKey() { inputPass = inputPass.slice(0, -1); updateDots(); }
-function updateDots() { document.querySelectorAll('.dot').forEach((dot, i) => { if (i < inputPass.length) dot.classList.add('active'); else dot.classList.remove('active'); }); }
+function updateDots() { 
+    document.querySelectorAll('.dot').forEach((dot, i) => { 
+        if (i < inputPass.length) dot.classList.add('active'); 
+        else dot.classList.remove('active'); 
+    }); 
+}
 function checkPass() {
     if (inputPass === CONFIG.passcode) {
         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
         setTimeout(() => { nextStage('#stage-passcode', '#stage-timer'); startTimer(); }, 800);
     } else {
-        gsap.to('.passcode-dots', { x: 10, duration: 0.1, yoyo: true, repeat: 5 }); inputPass = ""; setTimeout(updateDots, 500);
+        gsap.to('.passcode-dots', { x: 10, duration: 0.1, yoyo: true, repeat: 5 }); 
+        inputPass = ""; 
+        setTimeout(updateDots, 500);
     }
 }
 
@@ -66,7 +101,8 @@ function checkPass() {
 function startTimer() {
     const start = new Date(CONFIG.startDate).getTime();
     setInterval(() => {
-        const now = new Date().getTime(); const diff = now - start;
+        const now = new Date().getTime(); 
+        const diff = now - start;
         document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
         document.getElementById('hours').innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         document.getElementById('minutes').innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -80,12 +116,16 @@ async function loadGallery() {
     const container = document.getElementById('tinder-cards');
     container.innerHTML = '<h3 style="margin-top: 50px; color: white;">ກຳລັງໂຫຼດຮູບ... ⏳</h3>';
     
+    // ດຶງຂໍ້ມູນຮູບຈາກ Supabase
     const { data, error } = await supabase.from('photos').select('*').order('created_at', { ascending: true });
     
     container.innerHTML = '';
     document.getElementById('gallery-controls').style.display = 'flex'; 
 
-    if (error) { alert('ດຶງຂໍ້ມູນຜິດພາດ: ' + error.message); return; }
+    if (error) { 
+        alert('ດຶງຂໍ້ມູນຜິດພາດ: ' + error.message); 
+        return; 
+    }
 
     if (data.length === 0) {
         container.innerHTML = '<p id="no-img-text" style="color:white; margin-top:50px; font-size:1.2rem;">ຍັງບໍ່ມີຮູບພາບເທື່ອ!<br>ກົດປຸ່ມເພີ່ມຮູບເລີຍ 👆</p>';
@@ -106,10 +146,9 @@ function createCard(photoData, isNewUpload) {
     card.dataset.id = photoData.id;
     card.dataset.url = photoData.image_url;
     
-    // ດຶງຂໍ້ຄວາມມາສະແດງ (ຖ້າບໍ່ມີໃຫ້ເປັນຄ່າຫວ່າງ)
+    // ຂໍ້ຄວາມຄວາມຊົງຈຳ (ຖ້າບໍ່ມີກໍປະຫວ່າງໄວ້)
     const captionText = photoData.caption ? photoData.caption : "";
     
-    // ຈັດໂຄງສ້າງຮູບແບບ Polaroid (ຮູບຢູ່ເທິງ ຂໍ້ຄວາມຢູ່ກ້ອງ)
     card.innerHTML = `
         <img src="${photoData.image_url}" draggable="false" onerror="this.src='https://via.placeholder.com/280x380?text=Error'">
         <p style="position: absolute; bottom: 12px; left: 0; width: 100%; text-align: center; margin: 0; font-family: 'Noto Sans Lao', sans-serif; font-size: 1.1rem; font-weight: 600; color: #590d22; padding: 0 10px; box-sizing: border-box;">
@@ -158,12 +197,12 @@ function initHammerSwipe() {
     });
 }
 
-// --- ຟັງຊັນອັບໂຫຼດຮູບ + ໃຫ້ຂຽນຂໍ້ຄວາມ ---
+// --- ຟັງຊັນອັບໂຫຼດຮູບ (ພ້ອມພິມຂໍ້ຄວາມ) ---
 async function uploadCard(event) {
     const file = event.target.files[0];
     if (!file) return;
     
-    // ໃຫ້ຜູ້ໃຊ້ພິມຂໍ້ຄວາມຄວາມຊົງຈຳ ຫຼັງຈາກເລືອກຮູບແລ້ວ
+    // ໃຫ້ພິມຂໍ້ຄວາມຫຼັງເລືອກຮູບ
     const userCaption = prompt("ພິມຄວາມຊົງຈຳສຳລັບຮູບນີ້ (ຖ້າບໍ່ມີໃຫ້ປະຫວ່າງໄວ້ແລ້ວກົດ OK):") || "";
     
     const label = document.getElementById('upload-label');
@@ -171,7 +210,7 @@ async function uploadCard(event) {
     
     const fileName = Date.now() + '_' + Math.random().toString(36).substring(7) + '.jpg';
 
-    // 1. ອັບໂຫຼດເຂົ້າ Storage
+    // 1. ອັບໂຫຼດຮູບ
     const { data: uploadData, error: uploadError } = await supabase.storage.from('memories').upload(fileName, file);
     if (uploadError) { 
         alert('ອັບໂຫຼດບໍ່ສຳເລັດ: ' + uploadError.message); 
@@ -180,14 +219,14 @@ async function uploadCard(event) {
         return; 
     }
 
-    // 2. ດຶງເອົາລິ້ງຮູບ
+    // 2. ດຶງລິ້ງຮູບ
     const { data: publicUrlData } = supabase.storage.from('memories').getPublicUrl(fileName);
     const publicUrl = publicUrlData.publicUrl;
 
-    // 3. ບັນທຶກລິ້ງຮູບ ພ້ອມກັບ ຂໍ້ຄວາມ (Caption) ລົງຖານຂໍ້ມູນ
+    // 3. ບັນທຶກລິ້ງ + ຂໍ້ຄວາມ ລົງຖານຂໍ້ມູນ
     const { data: dbData, error: dbError } = await supabase.from('photos').insert([{ 
         image_url: publicUrl,
-        caption: userCaption // ບັນທຶກຂໍ້ຄວາມລົງໄປພ້ອມ
+        caption: userCaption
     }]).select();
     
     if (dbError) { 
