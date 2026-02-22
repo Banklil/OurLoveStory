@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700&family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="vv.css?v=2">
+    <link rel="stylesheet" href="vv.css?v=3">
 </head>
 <body>
     <canvas id="heart-canvas"></canvas>
@@ -76,10 +76,10 @@
             </div>
 
             <div class="gallery-controls" id="gallery-controls" style="display: none;">
-                <label class="control-btn" for="upload-input" id="upload-label">upload</label>
+                <label class="control-btn" for="upload-input" id="upload-label">⬆️ ເພີ່ມຮູບ</label>
                 <input type="file" id="upload-input" accept="image/*" style="display: none;" onchange="uploadCard(event)">
-                <button class="control-btn" onclick="deleteCard()">deleted</button>
-                <button class="control-btn" onclick="downloadCard()">dowloading</button>
+                <button class="control-btn" onclick="deleteCard()">🗑️ ລຶບ</button>
+                <button class="control-btn" onclick="downloadCard()">⬇️ ໂຫຼດ</button>
             </div>
 
             <button id="btn-to-scratch" class="next-btn" style="display: none; margin-top: 20px;" onclick="goToScratch()">
@@ -105,7 +105,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
-    <script src="vv.js"></script>
+    <script src="vv.js?v=3"></script>
 </body>
-
 </html>

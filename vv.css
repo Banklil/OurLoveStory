@@ -9,7 +9,7 @@
 body {
     margin: 0; padding: 0; height: 100vh; overflow: hidden;
     background: var(--bg-gradient);
-    touch-action: none; /* ສຳຄັນ: ປ້ອງກັນໜ້າຈໍເລື່ອນຕອນປັດຮູບ */
+    touch-action: none; 
     font-family: 'Noto Sans Lao', 'Poppins', sans-serif;
     display: flex; justify-content: center; align-items: center;
     color: #590d22;
@@ -32,13 +32,13 @@ body {
 .envelope { position: relative; width: 300px; height: 200px; background: var(--primary); border-radius: 0 0 15px 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
 .flap { position: absolute; top: 0; left: 0; width: 0; height: 0; border-left: 150px solid transparent; border-right: 150px solid transparent; border-top: 150px solid #ff5c8d; transform-origin: top; transition: 0.8s ease-in-out; z-index: 4; }
 .pocket { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: var(--primary); clip-path: polygon(0 0, 50% 40%, 100% 0, 100% 100%, 0 100%); z-index: 3; border-radius: 0 0 15px 15px; }
-.letter { position: absolute; width: 90%; height: 90%; background: white; top: 5%; left: 5%; border-radius: 5px; z-index: 2; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.8s ease-in-out; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+.letter { position: absolute; width: 90%; height: 90%; background: white; top: 5%; left: 5%; border-radius: 5px; z-index: 2; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.8s ease-in-out; box-shadow: 0 5px 15px rgba(0,0,0,0.1); font-size: 0.9rem;}
 .open .flap { transform: rotateX(180deg); z-index: 1; }
 .open .letter { transform: translateY(-120px) rotate(-2deg); z-index: 5; }
 .heart-seal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; z-index: 5; transition: 0.5s; }
 .open .heart-seal { opacity: 0; transform: scale(2); }
 
-/* Buttons & Ask Stage (ແກ້ໄຂໃຫ້ປຸ່ມຢູ່ໃກ້ກັນ) */
+/* Buttons & Ask Stage */
 .btn-group {
     display: flex; gap: 15px; justify-content: center; align-items: center;
     margin-top: 20px; position: relative; width: 100%; height: 60px;
@@ -67,40 +67,36 @@ button { font-family: 'Noto Sans Lao', sans-serif; cursor: pointer; border: none
 .time-box span { font-size: 1.5rem; font-weight: bold; color: var(--primary); display: block; }
 .time-box p { font-size: 0.8rem; margin: 0; color: #888; }
 
-/* === Gallery (ແກ້ໄຂໃຫ້ປັດງ່າຍ) === */
-.tinder-container {
-    width: 280px; height: 380px; position: relative; margin: 10px auto;
-}
+/* === Gallery (Polaroid & Controls) === */
+.tinder-container { width: 280px; height: 380px; position: relative; margin: 10px auto; }
 .tinder-cards { width: 100%; height: 100%; position: relative; }
 .tinder-card {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     background: white; padding: 10px; padding-bottom: 50px;
     border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    display: flex; justify-content: center; align-items: center;
-    touch-action: none; cursor: grab;
-    will-change: transform;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    touch-action: none; cursor: grab; will-change: transform; overflow: hidden;
 }
-.tinder-card img { 
-    width: 100%; height: 100%; object-fit: cover; 
-    border-radius: 4px; pointer-events: none; /* ປ້ອງກັນບໍ່ໃຫ້ຕິດຮູບຕອນປັດ */
-}
+.tinder-card img { width: 100%; height: calc(100% - 30px); object-fit: cover; border-radius: 4px; pointer-events: none; margin-bottom: 15px; }
 
-/* === Scratch Card (ແກ້ໄຂໃຫ້ບັງໜັງສືມິດ) === */
+/* ປຸ່ມຄວບຄຸມຮູບ */
+.gallery-controls { display: flex; gap: 10px; justify-content: center; margin-top: 15px; z-index: 10;}
+.control-btn { background: rgba(255, 255, 255, 0.8); color: var(--primary); padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; box-shadow: 0 3px 10px rgba(0,0,0,0.1); cursor: pointer; transition: 0.2s; display: inline-block;}
+.control-btn:active { transform: scale(0.95); background: white;}
+
+/* === Scratch Card === */
 .scratch-wrapper { 
-    position: relative; width: 300px; height: 180px; margin-top: 20px; 
+    position: relative; width: 300px; height: 200px; margin-top: 20px; 
     border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.15);
 }
 .secret-msg { 
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
     background: white; border-radius: 15px; border: 3px dashed var(--primary); 
     display: flex; flex-direction: column; justify-content: center; align-items: center; 
-    z-index: 1; padding: 10px; box-sizing: border-box;
+    z-index: 1; padding: 15px; box-sizing: border-box; font-size: 0.9rem;
 }
 .secret-msg h3 { margin: 0 0 10px 0; color: var(--primary); }
-.secret-msg p { margin: 5px 0; color: #555; }
+.secret-msg p { margin: 5px 0; color: #555; line-height: 1.4;}
 
-canvas#scratch-canvas { 
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-    z-index: 2; border-radius: 15px; cursor: crosshair; touch-action: none; 
-}
+canvas#scratch-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; border-radius: 15px; cursor: crosshair; touch-action: none; }
 .sub-text { font-size: 0.9rem; color: rgba(89, 13, 34, 0.7); margin-bottom: 10px;}

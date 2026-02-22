@@ -1,38 +1,53 @@
 // ==================== 1. ຕັ້ງຄ່າຂໍ້ມູນ ແລະ Supabase ====================
-// ລິ້ງ ແລະ ລະຫັດ API ຂອງເຈົ້າ (Supabase) ທີ່ເຊື່ອມຕໍ່ແລ້ວ!
 const supabaseUrl = 'https://fxhmjhwhpbvtflrhsofq.supabase.co'; 
 const supabaseKey = 'sb_publishable_sEN55L7TBNlWnsXd3_cnfg_6t3_p0w9'; 
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 const CONFIG = {
-    passcode: "1402", // ລະຫັດປົດລັອກ (1402)
-    startDate: "2025-01-10" // ວັນທີ 10/01/2025
+    passcode: "1402", 
+    startDate: "2025-01-10" 
 };
 
-// ==================== 2. Background Hearts ====================
+// ==================== 2. Background Hearts (Graphic Hearts) ====================
 const cvs = document.getElementById('heart-canvas');
 const ctx = cvs.getContext('2d');
 cvs.width = window.innerWidth; cvs.height = window.innerHeight;
 let hearts = [];
+
 class Heart {
     constructor() { 
         this.x = Math.random() * cvs.width; 
         this.y = cvs.height + Math.random() * 100; 
-        this.size = Math.random() * 15 + 5; 
-        this.speed = Math.random() * 2 + 1; 
-        this.opacity = Math.random() * 0.5 + 0.3; 
+        this.size = Math.random() * 1.2 + 0.5; 
+        this.speed = Math.random() * 1.5 + 0.5; 
+        this.opacity = Math.random() * 0.5 + 0.2; 
     }
     update() { 
         this.y -= this.speed; 
-        if (this.y < -50) this.y = cvs.height + 50; 
+        this.x += Math.sin(this.y / 50) * 0.5; // ເຮັດໃຫ້ຫົວໃຈລອຍແກວ່ງໄປມາງາມໆ
+        if (this.y < -50) {
+            this.y = cvs.height + 50;
+            this.x = Math.random() * cvs.width;
+        }
     }
     draw() { 
-        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`; 
-        ctx.font = `${this.size}px Arial`; 
-        ctx.fillText("❤️", this.x, this.y); 
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.scale(this.size, this.size);
+        ctx.fillStyle = `rgba(255, 51, 102, ${this.opacity})`; 
+        
+        ctx.beginPath();
+        ctx.moveTo(0, -5);
+        ctx.bezierCurveTo(0, -15, -15, -15, -15, -5);
+        ctx.bezierCurveTo(-15, 10, 0, 20, 0, 25);
+        ctx.bezierCurveTo(0, 20, 15, 10, 15, -5);
+        ctx.bezierCurveTo(15, -15, 0, -15, 0, -5);
+        ctx.fill();
+        ctx.restore();
     }
 }
-for (let i = 0; i < 50; i++) hearts.push(new Heart());
+
+for (let i = 0; i < 40; i++) hearts.push(new Heart());
 function animateHearts() { 
     ctx.clearRect(0, 0, cvs.width, cvs.height); 
     hearts.forEach(h => { h.update(); h.draw(); }); 
@@ -40,7 +55,7 @@ function animateHearts() {
 }
 animateHearts();
 
-// ==================== 3. Stage Management (ປ່ຽນໜ້າ) ====================
+// ==================== 3. Stage Management ====================
 function nextStage(hideId, showId, onCompleteCallback) {
     const hideEl = document.querySelector(hideId);
     const showEl = document.querySelector(showId);
@@ -116,7 +131,6 @@ async function loadGallery() {
     const container = document.getElementById('tinder-cards');
     container.innerHTML = '<h3 style="margin-top: 50px; color: white;">ກຳລັງໂຫຼດຮູບ... ⏳</h3>';
     
-    // ດຶງຂໍ້ມູນຮູບຈາກ Supabase
     const { data, error } = await supabase.from('photos').select('*').order('created_at', { ascending: true });
     
     container.innerHTML = '';
@@ -146,7 +160,6 @@ function createCard(photoData, isNewUpload) {
     card.dataset.id = photoData.id;
     card.dataset.url = photoData.image_url;
     
-    // ຂໍ້ຄວາມຄວາມຊົງຈຳ (ຖ້າບໍ່ມີກໍປະຫວ່າງໄວ້)
     const captionText = photoData.caption ? photoData.caption : "";
     
     card.innerHTML = `
@@ -202,7 +215,6 @@ async function uploadCard(event) {
     const file = event.target.files[0];
     if (!file) return;
     
-    // ໃຫ້ພິມຂໍ້ຄວາມຫຼັງເລືອກຮູບ
     const userCaption = prompt("ພິມຄວາມຊົງຈຳສຳລັບຮູບນີ້ (ຖ້າບໍ່ມີໃຫ້ປະຫວ່າງໄວ້ແລ້ວກົດ OK):") || "";
     
     const label = document.getElementById('upload-label');
@@ -210,7 +222,6 @@ async function uploadCard(event) {
     
     const fileName = Date.now() + '_' + Math.random().toString(36).substring(7) + '.jpg';
 
-    // 1. ອັບໂຫຼດຮູບ
     const { data: uploadData, error: uploadError } = await supabase.storage.from('memories').upload(fileName, file);
     if (uploadError) { 
         alert('ອັບໂຫຼດບໍ່ສຳເລັດ: ' + uploadError.message); 
@@ -219,11 +230,9 @@ async function uploadCard(event) {
         return; 
     }
 
-    // 2. ດຶງລິ້ງຮູບ
     const { data: publicUrlData } = supabase.storage.from('memories').getPublicUrl(fileName);
     const publicUrl = publicUrlData.publicUrl;
 
-    // 3. ບັນທຶກລິ້ງ + ຂໍ້ຄວາມ ລົງຖານຂໍ້ມູນ
     const { data: dbData, error: dbError } = await supabase.from('photos').insert([{ 
         image_url: publicUrl,
         caption: userCaption
@@ -302,5 +311,4 @@ scCanvas.addEventListener('mousemove', (e) => { if (isDrawing) scratch(getPos(e)
 scCanvas.addEventListener('mouseup', () => isDrawing = false);
 scCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); isDrawing = true; scratch(getPos(e).x, getPos(e).y); }, {passive: false});
 scCanvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (isDrawing) scratch(getPos(e).x, getPos(e).y); }, {passive: false});
-
 scCanvas.addEventListener('touchend', () => isDrawing = false);
