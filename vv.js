@@ -302,4 +302,5 @@ scCanvas.addEventListener('mousemove', (e) => { if (isDrawing) scratch(getPos(e)
 scCanvas.addEventListener('mouseup', () => isDrawing = false);
 scCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); isDrawing = true; scratch(getPos(e).x, getPos(e).y); }, {passive: false});
 scCanvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (isDrawing) scratch(getPos(e).x, getPos(e).y); }, {passive: false});
+
 scCanvas.addEventListener('touchend', () => isDrawing = false);
