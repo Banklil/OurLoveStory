@@ -1,4 +1,5 @@
 // ==================== 1. Setup Supabase ====================
+// ໃຊ້ window object ເພື່ອປ້ອງກັນ Error redeclaration
 if (typeof window.supabaseClient === 'undefined') {
     const supabaseUrl = 'https://fxhmjhwhpbvtflrhsofq.supabase.co';
     const supabaseKey = 'sb_publishable_sEN55L7TBNlWnsXd3_cnfg_6t3_p0w9';
@@ -10,7 +11,7 @@ const CONFIG = {
     startDate: "2026-01-10" 
 };
 
-// ==================== 2. Pro Glowing Hearts Animation (ຫົວໃຈລອຍ - ພື້ນຫຼັງ) ====================
+// ==================== 2. Pro Glowing Hearts Animation (ພື້ນຫຼັງ) ====================
 const cvs = document.getElementById('heart-canvas');
 const ctx = cvs.getContext('2d');
 let hearts = [];
@@ -54,7 +55,7 @@ if (cvs) {
     animate();
 }
 
-// ==================== 3. Navigation & Logic ====================
+// ==================== 3. Navigation Logic ====================
 function openEnvelope() {
     document.querySelector('.envelope-wrapper').classList.add('open');
     confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 }, shapes: ['heart'] });
@@ -76,6 +77,7 @@ function nextStage(hideId, showId, onComplete) {
       .fromTo(showEl.children, { y: 30, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.1, duration: 0.5 }, "-=0.2");
 }
 
+// Passcode Logic
 let inputPass = "";
 function pressKey(n) {
     if (inputPass.length < 4) {
@@ -95,6 +97,7 @@ function pressKey(n) {
 function clearKey() { inputPass = inputPass.slice(0, -1); updateDots(); }
 function updateDots() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i < inputPass.length)); }
 
+// Timer Logic (ສົມບູນ)
 function startTimer() {
     const start = new Date(CONFIG.startDate).getTime();
     setInterval(() => {
@@ -106,17 +109,24 @@ function startTimer() {
     }, 1000);
 }
 
-// ==================== 4. Gallery & Memories ====================
+// ==================== 4. Gallery Looping Swipe Logic ====================
+let currentHammer = null;
+
 async function loadGallery() {
     nextStage('#stage-timer', '#stage-gallery');
     document.getElementById('gallery-controls').style.display = "flex";
     document.getElementById('btn-to-scratch').style.display = "block";
+
     const container = document.getElementById('tinder-cards');
     container.innerHTML = '<p style="color:white; margin-top:100px;">ກຳລັງໂຫຼດຄວາມຊົງຈຳ... 💖</p>';
+
     const { data } = await window.supabaseClient.from('photos').select('*').order('created_at', { ascending: true });
     container.innerHTML = '';
+    
     if (data && data.length > 0) {
         data.forEach(p => createCard(p));
+        // Reset ຕຳແໜ່ງໃຫ້ຢູ່ກາງທຸກໃບ
+        gsap.set('.tinder-card', { x: 0, y: 0, opacity: 1 });
         initHammer();
     } else {
         container.innerHTML = '<p style="color:white; margin-top:80px;">ຍັງບໍ່ມີຮູບພາບເທື່ອ... 👆</p>';
@@ -132,10 +142,51 @@ function createCard(p) {
     document.getElementById('tinder-cards').appendChild(card);
 }
 
+function initHammer() {
+    const container = document.getElementById('tinder-cards');
+    const cards = container.querySelectorAll('.tinder-card');
+    if (!cards.length) return;
+
+    // ທຳລາຍ Hammer Instance ເກົ່າຖ້າມີ
+    if (currentHammer) currentHammer.destroy();
+
+    const topCard = cards[cards.length - 1];
+    currentHammer = new Hammer(topCard);
+
+    currentHammer.on('pan', (e) => {
+        const rotate = e.deltaX / 15;
+        topCard.style.transform = `translate(${e.deltaX}px, ${e.deltaY}px) rotate(${rotate}deg)`;
+        topCard.style.transition = 'none';
+    });
+
+    currentHammer.on('panend', (e) => {
+        const threshold = 120;
+        const keep = Math.abs(e.deltaX) < threshold && Math.abs(e.velocityX) < 0.5;
+
+        if (!keep) {
+            const moveOutWidth = document.body.clientWidth;
+            const endX = e.deltaX > 0 ? moveOutWidth : -moveOutWidth;
+
+            gsap.to(topCard, {
+                x: endX, opacity: 0, rotation: e.deltaX / 5, duration: 0.4,
+                onComplete: () => {
+                    // Looping: ຍ້າຍໄປໄວ້ທາງລຸ່ມສຸດຂອງ Stack (prepend ໃນ DOM)
+                    container.prepend(topCard);
+                    gsap.set(topCard, { x: 0, y: 0, rotation: (Math.random() - 0.5) * 10, opacity: 1 });
+                    initHammer(); // ເລີ່ມຕົ້ນກັບໃບໃໝ່ທີ່ຢູ່ເທິງສຸດ
+                }
+            });
+        } else {
+            gsap.to(topCard, { x: 0, y: 0, rotation: 0, duration: 0.5, ease: "elastic.out(1, 0.6)" });
+        }
+    });
+}
+
+// Gallery Actions
 async function uploadCard(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const cap = prompt("ຂຽນຄວາມຊົງຈຳສຳລັບຮູບນີ້:");
+    const cap = prompt("ຂຽນຄວາມຊົງຈຳ:");
     if (cap === null) return;
     const label = document.getElementById('upload-label');
     const originalText = label.innerHTML; label.innerText = "⏳...";
@@ -144,7 +195,7 @@ async function uploadCard(e) {
         await window.supabaseClient.storage.from('memories').upload(name, file);
         const { data: url } = window.supabaseClient.storage.from('memories').getPublicUrl(name);
         await window.supabaseClient.from('photos').insert([{ image_url: url.publicUrl, caption: cap }]);
-        confetti(); loadGallery();
+        loadGallery();
     } catch (err) { alert("Error!"); } finally { label.innerHTML = originalText; }
 }
 
@@ -162,79 +213,24 @@ function downloadCard() {
     window.open(cards[cards.length - 1].querySelector('img').src, '_blank');
 }
 
-function initHammer() {
-    const cards = document.querySelectorAll('.tinder-card');
-    if (!cards.length) return;
-    const lastCard = cards[cards.length-1];
-    const h = new Hammer(lastCard);
-    h.on('pan', e => { lastCard.style.transform = `translate(${e.deltaX}px, ${e.deltaY}px) rotate(${e.deltaX/15}deg)`; });
-    h.on('panend', e => {
-        if (Math.abs(e.deltaX) > 120) {
-            gsap.to(lastCard, { x: e.deltaX * 5, opacity: 0, duration: 0.5, onComplete: () => { lastCard.remove(); initHammer(); } });
-        } else {
-            gsap.to(lastCard, { x: 0, y: 0, rotation: 0, duration: 0.4, ease: "elastic.out(1, 0.5)" });
-        }
-    });
-}
-
-// ==================== 5. Scratch Card Logic (Clean Silver - No Particles) ====================
+// ==================== 5. Scratch Card Logic (Clean) ====================
 function goToScratch() { nextStage('#stage-gallery', '#stage-scratch', initScratch); }
-
 function initScratch() {
     const sc = document.getElementById('scratch-canvas');
     const sctx = sc.getContext('2d');
-    const wrapper = sc.parentNode;
-    
-    // ປັບຂະໜາດໃຫ້ພໍດີ
-    sc.width = wrapper.offsetWidth; 
-    sc.height = wrapper.offsetHeight;
-    
-    // ສ້າງພື້ນຫຼັງສີເງິນ
+    sc.width = sc.parentNode.offsetWidth; sc.height = sc.parentNode.offsetHeight;
     let grad = sctx.createLinearGradient(0, 0, sc.width, sc.height);
-    grad.addColorStop(0, '#D3D3D3'); 
-    grad.addColorStop(0.5, '#A9A9A9'); 
-    grad.addColorStop(1, '#D3D3D3');
-    sctx.fillStyle = grad; 
-    sctx.fillRect(0, 0, sc.width, sc.height);
-    
-    // ຂໍ້ຄວາມເທິງບັດ
-    sctx.fillStyle = "#555"; 
-    sctx.font = "bold 20px 'Noto Sans Lao'"; 
-    sctx.textAlign = "center";
+    grad.addColorStop(0, '#D3D3D3'); grad.addColorStop(0.5, '#A9A9A9'); grad.addColorStop(1, '#D3D3D3');
+    sctx.fillStyle = grad; sctx.fillRect(0, 0, sc.width, sc.height);
+    sctx.fillStyle = "#555"; sctx.font = "bold 20px 'Noto Sans Lao'"; sctx.textAlign = "center";
     sctx.fillText("✨ ຂູດລຸ້ນຄວາມໃນໃຈ ✨", sc.width/2, sc.height/2);
-
-    // ຕັ້ງຄ່າໃຫ້ຂູດແລ້ວເປັນໂປ່ງໃສ
     sctx.globalCompositeOperation = 'destination-out';
-
-    const scratch = (x, y) => {
-        sctx.beginPath(); 
-        sctx.arc(x, y, 35, 0, 6.28); // ຂະໜາດວົງມົນເວລາຂູດ
-        sctx.fill();
-    };
-
-    const getPos = (e) => {
-        const rect = sc.getBoundingClientRect();
-        const cx = e.touches ? e.touches[0].clientX : e.clientX;
-        const cy = e.touches ? e.touches[0].clientY : e.clientY;
-        return { x: cx - rect.left, y: cy - rect.top };
-    };
-
-    // ເຫດການສຳລັບເມົາສ໌
-    sc.addEventListener('mousemove', (e) => { 
-        if(e.buttons === 1) {
-            const pos = getPos(e);
-            scratch(pos.x, pos.y);
-        }
-    });
-
-    // ເຫດການສຳລັບໜ້າຈໍສຳຜັດ
-    sc.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        const pos = getPos(e);
-        scratch(pos.x, pos.y);
-    }, {passive: false});
+    const scratch = (x, y) => { sctx.beginPath(); sctx.arc(x, y, 35, 0, 6.28); sctx.fill(); };
+    const getPos = (e) => { const rect = sc.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const cy = e.touches ? e.touches[0].clientY : e.clientY; return { x: cx - rect.left, y: cy - rect.top }; };
+    sc.addEventListener('mousemove', (e) => { if(e.buttons === 1) scratch(getPos(e).x, getPos(e).y); });
+    sc.addEventListener('touchmove', (e) => { e.preventDefault(); scratch(getPos(e).x, getPos(e).y); }, {passive: false});
 }
 
-// Interactions
+// No Button Interaction
 const noBtn = document.getElementById('no-btn');
 if (noBtn) { noBtn.addEventListener('mouseenter', () => { gsap.to(noBtn, { x: (Math.random()-0.5)*250, y: (Math.random()-0.5)*250, duration: 0.2 }); }); }

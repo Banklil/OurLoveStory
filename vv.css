@@ -5,6 +5,9 @@
     --bg-gradient: radial-gradient(circle at center, #ffe6ea, #ffc0cb, #ff99ac);
     --glass-bg: rgba(255, 255, 255, 0.25);
     --glass-border: rgba(255, 255, 255, 0.5);
+    --berry-deep: #a4133c;
+    --berry-rose: #ff4d6d;
+    --berry-blush: #ffb3c1;
 }
 
 * { 
@@ -42,251 +45,116 @@ body {
 .hidden { display: none !important; opacity: 0; pointer-events: none; }
 
 /* ==================== 3. Envelope & Letter ==================== */
-.envelope-wrapper { 
-    cursor: pointer; transform: scale(0.9); 
-    transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); margin: 20px 0; 
-}
-.envelope { 
-    position: relative; width: 300px; height: 200px; 
-    background: var(--primary); border-radius: 0 0 15px 15px; 
-    box-shadow: 0 15px 35px rgba(255, 51, 102, 0.3); 
-}
-.flap { 
-    position: absolute; top: 0; left: 0; width: 0; height: 0; 
-    border-left: 150px solid transparent; border-right: 150px solid transparent; 
-    border-top: 150px solid #ff5c8d; transform-origin: top; transition: 0.8s; z-index: 4; 
-}
-.pocket { 
-    position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; 
-    background: var(--primary); clip-path: polygon(0 0, 50% 40%, 100% 0, 100% 100%, 0 100%); 
-    z-index: 3; border-radius: 0 0 15px 15px; 
-}
-.letter { 
-    position: absolute; width: 90%; height: 90%; background: white; 
-    top: 5%; left: 5%; border-radius: 5px; z-index: 2; padding: 15px; 
-    display: flex; flex-direction: column; justify-content: center; align-items: center; 
-    transition: 0.8s; font-size: 0.9rem; line-height: 1.5;
-}
+.envelope-wrapper { cursor: pointer; transform: scale(0.9); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); margin: 20px 0; }
+.envelope { position: relative; width: 300px; height: 200px; background: var(--primary); border-radius: 0 0 15px 15px; box-shadow: 0 15px 35px rgba(255, 51, 102, 0.3); }
+.flap { position: absolute; top: 0; left: 0; width: 0; height: 0; border-left: 150px solid transparent; border-right: 150px solid transparent; border-top: 150px solid #ff5c8d; transform-origin: top; transition: 0.8s; z-index: 4; }
+.pocket { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: var(--primary); clip-path: polygon(0 0, 50% 40%, 100% 0, 100% 100%, 0 100%); z-index: 3; border-radius: 0 0 15px 15px; }
+.letter { position: absolute; width: 90%; height: 90%; background: white; top: 5%; left: 5%; border-radius: 5px; z-index: 2; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.8s; font-size: 0.9rem; line-height: 1.5; }
 .open .flap { transform: rotateX(180deg); z-index: 0; }
 .open .letter { transform: translateY(-130px) rotate(-2deg); z-index: 5; }
-.heart-seal { 
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-    font-size: 40px; z-index: 5; transition: 0.4s; 
-}
-.open .heart-seal { opacity: 0; transform: translate(-50%, -50%) scale(2); }
+.heart-seal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; z-index: 5; transition: 0.4s; }
 
-/* ==================== 4. Buttons Style ==================== */
-button { 
-    font-family: 'Noto Sans Lao', sans-serif; cursor: pointer; 
-    border: none; outline: none; transition: 0.3s; 
-}
-.glow-btn { 
-    padding: 15px 35px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; 
-    background: white; color: var(--primary); 
-    box-shadow: 0 10px 30px rgba(255, 51, 102, 0.4); 
-}
-.yes-btn { 
-    background: linear-gradient(45deg, #d80e55, #d03478); color: white; 
-    padding: 15px 40px; border-radius: 40px; font-size: 1.2rem; font-weight: bold; 
-    box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3); 
-}
-.no-btn { 
-    background: linear-gradient(45deg, #7a2db4, #d944d4); color: white; 
-    padding: 15px 30px; border-radius: 40px; 
-}
-.pulse-anim { animation: pulsePro 2s infinite; }
-@keyframes pulsePro { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-
-/* ==================== 5. Keypad Style (Smartphone) ==================== */
+/* ==================== 4. Keypad & Passcode (Phone Pro) ==================== */
 .passcode-dots { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; }
-.dot { 
-    width: 16px; height: 16px; border-radius: 50%; 
-    border: 2px solid rgba(255, 255, 255, 0.8); transition: 0.3s; 
-}
+.dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.8); transition: 0.3s; }
 .dot.active { background: white; box-shadow: 0 0 15px white; transform: scale(1.2); }
 
-.keypad { 
-    display: grid; grid-template-columns: repeat(3, 1fr); 
-    gap: 15px; justify-items: center; width: 100%; max-width: 280px; margin-top: 20px; 
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; justify-items: center; width: 100%; max-width: 280px; margin-top: 20px; }
+.keypad button {
+    width: 78px !important; height: 78px !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(15px) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+    color: white !important; font-size: 1.8rem !important;
+    border-radius: 50% !important; box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important;
 }
-.keypad button { 
-    width: 75px; height: 75px; border-radius: 50%; 
-    border: 1.5px solid var(--glass-border); 
-    background: var(--glass-bg); backdrop-filter: blur(10px); 
-    color: white; font-size: 1.7rem; font-weight: 500; 
-    display: flex; justify-content: center; align-items: center;
-}
-.keypad button:active { background: rgba(255, 255, 255, 0.5); transform: scale(0.9); }
-.back-key { font-size: 1.3rem !important; background: transparent !important; border: none !important; }
-.empty-space { width: 75px; height: 75px; }
 
-/* ==================== 6. Glassmorphism Timer ==================== */
+/* ==================== 5. Glassmorphism Timer ==================== */
 .timer-wrapper { display: flex; gap: 12px; margin: 30px 0; justify-content: center; }
-.time-box { 
-    background: var(--glass-bg); backdrop-filter: blur(12px); 
-    border: 1.5px solid var(--glass-border); 
-    padding: 15px 10px; border-radius: 18px; min-width: 75px; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-    animation: float 3s ease-in-out infinite alternate; 
-}
+.time-box { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1.5px solid var(--glass-border); padding: 15px 10px; border-radius: 18px; min-width: 75px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); animation: float 3s ease-in-out infinite alternate; }
 .time-box span { font-size: 2.2rem; font-weight: 800; color: var(--primary); display: block; line-height: 1; }
 .time-box p { font-size: 0.8rem; margin: 5px 0 0; color: #590d22; font-weight: 700; letter-spacing: 1px; }
 @keyframes float { from { transform: translateY(0); } to { transform: translateY(-8px); } }
 
-/* ==================== 7. Memories & Controls (ຈັດວາງໃໝ່) ==================== */
-.tinder-container {
-    position: relative; width: 300px; height: 400px; margin-bottom: 20px;
-}
-.tinder-card { 
-    position: absolute; width: 100%; height: 100%; background: white; 
-    padding: 12px 12px 60px 12px; border-radius: 15px; 
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15); transform-origin: center bottom; 
-    border: 4px solid white; left: 50%; transform: translateX(-50%);
-}
-.tinder-card img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; pointer-events: none; }
-.tinder-card p { 
-    position: absolute; bottom: 15px; left: 0; width: 100%; text-align: center;
-    font-family: 'Caveat', 'Noto Sans Lao', cursive; 
-    font-size: 1.5rem; color: #590d22; margin: 0; font-weight: bold; 
-}
-
-/* ==================== Memories Layout Fix (Centering) ==================== */
-
-/* ຈັດໃຫ້ Stage ທັງໝົດຢູ່ເຄິ່ງກາງ */
-#stage-gallery {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100vh;
-}
-
-/* ຈັດກ່ອງໃສ່ຮູບໃຫ້ຢູ່ເຄິ່ງກາງເປະໆ */
-.tinder-container {
-    position: relative;
-    width: 320px; /* ກຳນົດຄວາມກວ້າງໃຫ້ຊັດເຈນ */
-    height: 420px; /* ກຳນົດຄວາມສູງໃຫ້ຊັດເຈນ */
-    margin: 20px auto; /* ຈັດເຄິ່ງກາງແນວນອນ */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.tinder-card {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgb(247, 247, 245);
-    padding: 12px 12px 60px 12px;
-    border-radius: 15px;
-    box-shadow: 0 15px 45px rgba(0,0,0,0.2);
-    border: 5px solid rgb(249, 249, 246);
-    /* ບັງຄັບໃຫ້ຢູ່ເຄິ່ງກາງຂອງ container */
-    left: 0;
-    top: 0;
-    cursor: grab;
-    user-select: none;
-    touch-action: none;
-}
-
-.tinder-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 8px;
-    pointer-events: none;
-}
-
+/* ==================== 6. Centered Looping Gallery (ເປະທີ່ສຸດ) ==================== */
+#stage-gallery { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100vh; overflow: hidden; }
+.tinder-container { position: relative; width: 320px; height: 450px; display: flex; justify-content: center; align-items: center; perspective: 1000px; z-index: 10; }
+.tinder-cards { position: absolute; width: 100%; height: 100%; transform-style: preserve-3d; }
+.tinder-card { position: absolute; width: 100%; height: 100%; background: white; padding: 12px 12px 70px 12px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 6px solid white; left: 0; top: 0; cursor: grab; user-select: none; touch-action: none; will-change: transform; transition: transform 0.5s ease, opacity 0.5s ease; }
+.tinder-card img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; pointer-events: none; }
 .tinder-card p {
     position: absolute;
-    bottom: 15px;
+    bottom: 8px;  /* <-- ແກ້ໄຂບ່ອນນີ້ (ຈາກ 15px ເປັນ 8px) */
     left: 0;
     width: 100%;
     text-align: center;
     font-family: 'Caveat', 'Noto Sans Lao', cursive;
-    font-size: 1.6rem;
-    color: #8e2140;
-    margin: 0;
+    font-size: 1.8rem;
+    color: var(--berry-deep);
     font-weight: bold;
 }
-
-/* ຈັດກຸ່ມປຸ່ມຄວບຄຸມໃຫ້ລຽງກັນງາມໆ */
-.gallery-controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 40px; /* ເພີ່ມໄລຍະຫ່າງຈາກຮູບ */
-    flex-wrap: wrap;
-    width: 100%;
-    max-width: 360px;
+/* ==================== 7. Professional Berry Suite (ປຸ່ມມືອາຊີບ) ==================== */
+button, .control-btn, .next-btn, .glow-btn {
+    font-family: 'Noto Sans Lao', 'Poppins', sans-serif !important;
+    cursor: pointer; border: none; outline: none;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    letter-spacing: 0.5px; user-select: none;
 }
 
-.control-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 18px;
-    border-radius: 25px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    cursor: pointer;
-    border: none;
-    transition: 0.2s;
+/* ປຸ່ມ Glow (ໜ້າທຳອິດ & ໂມງ) */
+.glow-btn, .next-btn.glass-btn {
+    background: linear-gradient(135deg, #ffffff, #fff0f3) !important;
+    color: var(--primary) !important; padding: 16px 45px !important;
+    border-radius: 50px !important; font-size: 1.1rem !important;
+    font-weight: 800 !important; box-shadow: 0 10px 25px rgba(255, 51, 102, 0.25) !important;
+    text-transform: uppercase;
 }
 
-/* ປຸ່ມ "ໄປຂູດລາງວັນ" ໃຫ້ຢູ່ລຸ່ມສຸດເຄິ່ງກາງ */
+/* ປຸ່ມ Yes/Love */
+.yes-btn {
+    background: linear-gradient(135deg, #ff0a54, #ff4d6d) !important;
+    color: white !important; padding: 18px 45px !important;
+    border-radius: 50px !important; font-size: 1.2rem !important;
+    font-weight: bold; box-shadow: 0 12px 30px rgba(255, 10, 84, 0.35) !important;
+}
+
+/* ປຸ່ມ No */
+.no-btn {
+    background: linear-gradient(135deg, #a4133c, #800f2f) !important;
+    color: white !important; padding: 15px 35px !important;
+    border-radius: 50px !important; opacity: 0.9;
+    box-shadow: 0 8px 20px rgba(164, 19, 60, 0.2) !important;
+}
+
+/* ປຸ່ມຄວບຄຸມ Gallery */
+.gallery-controls { display: flex; justify-content: center; gap: 10px; margin-top: 30px; flex-wrap: wrap; z-index: 20; }
+.upload-btn { background: linear-gradient(135deg, #ff758f, #ff4d6d) !important; color: white !important; padding: 10px 18px; border-radius: 25px; box-shadow: 0 8px 15px rgba(255, 77, 109, 0.3) !important; }
+.del-btn { background: #ffffff !important; color: #a4133c !important; border: 1.5px solid #ff4d6d !important; padding: 10px 18px; border-radius: 25px; }
+.download-btn { background: #ffb3c1 !important; color: #590d22 !important; padding: 10px 18px; border-radius: 25px; }
+
+/* ປຸ່ມ "ໄປຂູດລາງວັນ" (Special Glowing & Shine) */
 #btn-to-scratch {
+    background: linear-gradient(45deg, #ff0a54, #ff4d6d, #ff0a54) !important;
+    background-size: 200% auto !important;
+    color: white !important; font-weight: 800 !important;
+    padding: 16px 50px !important; border-radius: 50px !important;
+    box-shadow: 0 10px 30px rgba(255, 10, 84, 0.4) !important;
+    animation: shine 3s linear infinite, pulsePro 2s infinite !important;
     margin-top: 25px;
 }
 
+@keyframes shine { to { background-position: 200% center; } }
+@keyframes pulsePro { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+/* Interactions */
+button:hover, .control-btn:hover { transform: translateY(-3px) scale(1.03); filter: brightness(1.1); }
+button:active { transform: translateY(-1px) scale(0.97); }
+
 /* ==================== 8. Professional Scratch Card ==================== */
-.scratch-wrapper { 
-    position: relative; display: inline-block; margin-top: 25px; 
-    border: 10px solid white; border-radius: 25px; overflow: hidden; 
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: rotate(-1deg); 
-    background: white; max-width: 95%;
-}
-.secret-msg { 
-    padding: 35px 25px; background: radial-gradient(circle, #fff, #fef1f3); 
-    text-align: center; border: 2.5px dashed var(--secondary); 
-    border-radius: 15px; margin: 8px; min-width: 280px;
-}
+.scratch-wrapper { position: relative; display: inline-block; margin-top: 25px; border: 10px solid white; border-radius: 25px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: rotate(-1deg); background: white; max-width: 95%; }
+.secret-msg { padding: 35px 25px; background: radial-gradient(circle, #fff, #fef1f3); text-align: center; border: 2.5px dashed var(--secondary); border-radius: 15px; margin: 8px; min-width: 280px; }
 canvas#scratch-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; touch-action: none; }
 
-/* Glass Utility Classes */
+/* Utilities */
 .glass-title { font-weight: 800; text-shadow: 0 2px 10px rgba(255, 255, 255, 0.5); margin-bottom: 20px; }
-.next-btn.glass-btn {
-    background: white; color: var(--primary); font-weight: bold;
-    box-shadow: 0 10px 25px rgba(255, 51, 102, 0.2);
-    border-radius: 30px; padding: 12px 40px; margin-top: 35px;
-}
-/* =========================================
-   ✅ Mobile Responsive Fix (ຈັດກາງກຣາຟໃນມືຖື)
-========================================= */
-@media screen and (max-width: 992px) {
-    /* 1. ຈັດໃຫ້ Container ຫຼັກລຽງເປັນແນວຕັ້ງ ແລະ ຢູ່ກາງ */
-    .charts-container {
-        display: flex;
-        flex-direction: column; /* ໃຫ້ລຽງຊ້ອນກັນ (ເທິງ-ລຸ່ມ) */
-        align-items: center;    /* ຈັດໃຫ້ຢູ່ເຄິ່ງກາງທາງຂວາງ */
-        gap: 20px;              /* ໄລຍະຫ່າງລະຫວ່າງກຣາຟເທິງກັບລຸ່ມ */
-        width: 100%;
-        padding: 10px;          /* ເພີ່ມຂອບເຂດເລັກນ້ອຍ */
-    }
-
-    /* 2. ປັບຂະໜາດກ່ອງກຣາຟໃຫ້ພໍດີກັບມືຖື */
-    .chart-box {
-        width: 95%;             /* ໃຫ້ກວ້າງເກືອບເຕັມໜ້າຈໍ */
-        max-width: 500px;       /* ແຕ່ບໍ່ໃຫ້ກວ້າງເກີນ 500px (ເພື່ອຄວາມງາມ) */
-        margin: 0 auto;         /* ຈັດກາງແບບສຳຮອງ (Fallback center) */
-    }
-
-    /* 3. ປັບຂະໜາດຕົວໜັງສືໃນກຣາຟໃຫ້ອ່ານງ່າຍຂຶ້ນໃນມືຖື (Optional) */
-    .chart-box h3 {
-        font-size: 1rem;
-        text-align: center;
-    }
-}
