@@ -86,12 +86,12 @@ button {
     box-shadow: 0 10px 30px rgba(255, 51, 102, 0.4); 
 }
 .yes-btn { 
-    background: linear-gradient(45deg, #28a745, #34d058); color: white; 
+    background: linear-gradient(45deg, #d80e55, #d03478); color: white; 
     padding: 15px 40px; border-radius: 40px; font-size: 1.2rem; font-weight: bold; 
     box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3); 
 }
 .no-btn { 
-    background: linear-gradient(45deg, #dc3545, #ff4f5e); color: white; 
+    background: linear-gradient(45deg, #7a2db4, #d944d4); color: white; 
     padding: 15px 30px; border-radius: 40px; 
 }
 .pulse-anim { animation: pulsePro 2s infinite; }
@@ -262,4 +262,31 @@ canvas#scratch-canvas { position: absolute; top: 0; left: 0; width: 100%; height
     background: white; color: var(--primary); font-weight: bold;
     box-shadow: 0 10px 25px rgba(255, 51, 102, 0.2);
     border-radius: 30px; padding: 12px 40px; margin-top: 35px;
+}
+/* =========================================
+   ✅ Mobile Responsive Fix (ຈັດກາງກຣາຟໃນມືຖື)
+========================================= */
+@media screen and (max-width: 992px) {
+    /* 1. ຈັດໃຫ້ Container ຫຼັກລຽງເປັນແນວຕັ້ງ ແລະ ຢູ່ກາງ */
+    .charts-container {
+        display: flex;
+        flex-direction: column; /* ໃຫ້ລຽງຊ້ອນກັນ (ເທິງ-ລຸ່ມ) */
+        align-items: center;    /* ຈັດໃຫ້ຢູ່ເຄິ່ງກາງທາງຂວາງ */
+        gap: 20px;              /* ໄລຍະຫ່າງລະຫວ່າງກຣາຟເທິງກັບລຸ່ມ */
+        width: 100%;
+        padding: 10px;          /* ເພີ່ມຂອບເຂດເລັກນ້ອຍ */
+    }
+
+    /* 2. ປັບຂະໜາດກ່ອງກຣາຟໃຫ້ພໍດີກັບມືຖື */
+    .chart-box {
+        width: 95%;             /* ໃຫ້ກວ້າງເກືອບເຕັມໜ້າຈໍ */
+        max-width: 500px;       /* ແຕ່ບໍ່ໃຫ້ກວ້າງເກີນ 500px (ເພື່ອຄວາມງາມ) */
+        margin: 0 auto;         /* ຈັດກາງແບບສຳຮອງ (Fallback center) */
+    }
+
+    /* 3. ປັບຂະໜາດຕົວໜັງສືໃນກຣາຟໃຫ້ອ່ານງ່າຍຂຶ້ນໃນມືຖື (Optional) */
+    .chart-box h3 {
+        font-size: 1rem;
+        text-align: center;
+    }
 }
