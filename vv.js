@@ -11,10 +11,18 @@ const CONFIG = {
     startDate: "2026-01-10" 
 };
 
-// ==================== 2. Pro Glowing Hearts Animation (ພື້ນຫຼັງ) ====================
+// ==================== 2. ເອົາຮູບ 6 ໃບມາລອຍ (ແກ້ໄຂແລ້ວ 100%) ====================
 const cvs = document.getElementById('heart-canvas');
 const ctx = cvs.getContext('2d');
 let hearts = [];
+
+// 💡 ໂຫຼດຮູບທັງ 6 ໄຟລ໌ໃຫ້ຖືກຕ້ອງ (ໃຊ້ Array ເກັບຮູບ)
+const heartImages = [];
+for (let i = 1; i <= 6; i++) {
+    let img = new Image();
+    img.src = `${i}.png`; // ມັນຈະດຶງຮູບ 1.png, 2.png, 3.png ໄປຈົນຮອດ 6.png ອັດຕະໂນມັດ
+    heartImages.push(img);
+}
 
 if (cvs) {
     function resize() { cvs.width = window.innerWidth; cvs.height = window.innerHeight; }
@@ -25,14 +33,17 @@ if (cvs) {
         reset(initial = false) {
             this.x = Math.random() * cvs.width;
             this.y = initial ? Math.random() * cvs.height : cvs.height + 100;
-            this.size = Math.random() * 2 + 0.8;
+            
+            // ປັບຂະໜາດຮູບ (ປັບຕົວເລກ 0.1 ຫາ 0.3 ໄດ້ຖ້າຢາກໃຫ້ໃຫຍ່/ນ້ອຍລົງ)
+            this.size = Math.random() * 0.15 + 0.1; 
+            
             this.speedY = Math.random() * 1.5 + 0.8;
             this.speedX = (Math.random() - 0.5) * 1.5;
-            this.opacity = Math.random() * 0.6 + 0.3;
             this.angle = Math.random() * 360;
-            this.spinSpeed = (Math.random() - 0.5) * 2;
-            this.colorLight = `hsla(${Math.random() * 20 + 340}, 100%, 85%, ${this.opacity})`;
-            this.colorDeep = `hsla(${Math.random() * 20 + 330}, 100%, 55%, ${this.opacity})`;
+            this.spinSpeed = (Math.random() - 0.5) * 1.5;
+            
+            // 💡 ສຸ່ມເລືອກຮູບ 1 ໃບ ຈາກທັງໝົດ 6 ໃບ ມາສະແດງ
+            this.image = heartImages[Math.floor(Math.random() * heartImages.length)];
         }
         update() {
             this.y -= this.speedY;
@@ -41,17 +52,29 @@ if (cvs) {
             if (this.y < -100) this.reset();
         }
         draw() {
-            ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle * Math.PI / 180); ctx.scale(this.size, this.size);
-            let grd = ctx.createRadialGradient(0, -5, 2, 0, 0, 25);
-            grd.addColorStop(0, this.colorLight); grd.addColorStop(1, this.colorDeep);
-            ctx.fillStyle = grd; ctx.beginPath(); ctx.moveTo(0, -10);
-            ctx.bezierCurveTo(0, -22, -25, -22, -25, -10); ctx.bezierCurveTo(-25, 15, 0, 28, 0, 35);
-            ctx.bezierCurveTo(0, 28, 25, 15, 25, -10); ctx.bezierCurveTo(25, -22, 0, -22, 0, -10);
-            ctx.shadowColor = this.colorDeep; ctx.shadowBlur = 15; ctx.fill(); ctx.restore();
+            // ຖ້າຮູບຍັງໂຫຼດບໍ່ສຳເລັດ ບໍ່ຕ້ອງແຕ້ມ
+            if (!this.image.complete) return; 
+
+            ctx.save(); 
+            ctx.translate(this.x, this.y); 
+            ctx.rotate(this.angle * Math.PI / 180); 
+            ctx.scale(this.size, this.size);
+            
+            // ສັ່ງເອົາຮູບມາແຕ້ມລົງ Canvas
+            ctx.drawImage(this.image, -this.image.width / 2, -this.image.height / 2);
+            
+            ctx.restore();
         }
     }
-    for (let i = 0; i < 45; i++) hearts.push(new HeartPro());
-    function animate() { ctx.clearRect(0, 0, cvs.width, cvs.height); hearts.forEach(h => { h.update(); h.draw(); }); requestAnimationFrame(animate); }
+    
+    // ຈຳນວນຮູບທີ່ຢາກໃຫ້ລອຍ (ປະມານ 30 ກຳລັງງາມ)
+    for (let i = 0; i < 30; i++) hearts.push(new HeartPro()); 
+    
+    function animate() { 
+        ctx.clearRect(0, 0, cvs.width, cvs.height); 
+        hearts.forEach(h => { h.update(); h.draw(); }); 
+        requestAnimationFrame(animate); 
+    }
     animate();
 }
 
@@ -136,8 +159,21 @@ async function loadGallery() {
 function createCard(p) {
     const card = document.createElement('div');
     card.className = 'tinder-card'; card.dataset.id = p.id;
-    const captionHtml = p.caption ? `<p>${p.caption}</p>` : '<p>you a mine</p>';
+    
+    // 💡 ລະບົບປັບຂະໜາດໂຕໜັງສືອັດຕະໂນມັດ ຕາມຄວາມຍາວຂອງຂໍ້ຄວາມ
+    let text = p.caption ? p.caption : 'you a mine';
+    let fSize = '1.5rem'; // ຂະໜາດປົກກະຕິ (ສຳລັບຂໍ້ຄວາມສັ້ນໆ)
+    
+    if (text.length > 80) {
+        fSize = '0.9rem'; // ຖ້າພິມຍາວຫຼາຍ (ກາຍ 80 ຕົວອັກສອນ) ໃຫ້ນ້ອຍລົງສຸດ
+    } else if (text.length > 35) {
+        fSize = '1.15rem'; // ຖ້າພິມຍາວກາງໆ ໃຫ້ນ້ອຍລົງໜ້ອຍໜຶ່ງ
+    }
+
+    // ເອົາຂະໜາດທີ່ຄຳນວນໄດ້ ມາໃສ່ໃນ <p>
+    const captionHtml = `<p style="font-size: ${fSize};">${text}</p>`;
     card.innerHTML = `<img src="${p.image_url}" draggable="false">${captionHtml}`;
+    
     gsap.set(card, { rotation: (Math.random() - 0.5) * 8 });
     document.getElementById('tinder-cards').appendChild(card);
 }
@@ -183,20 +219,39 @@ function initHammer() {
 }
 
 // Gallery Actions
+// ແທນທີ່ຟັງຊັນ uploadCard ອັນເກົ່າດ້ວຍອັນນີ້
 async function uploadCard(e) {
     const file = e.target.files[0];
     if (!file) return;
     const cap = prompt("ຂຽນຄວາມຊົງຈຳ:");
     if (cap === null) return;
+    
     const label = document.getElementById('upload-label');
-    const originalText = label.innerHTML; label.innerText = "⏳...";
-    const name = `${Date.now()}.jpg`;
+    const originalText = label.innerHTML; 
+    label.innerText = "⏳ ກຳລັງໂຫຼດ...";
+    
+    // 💡 ວິທີແກ້: ດຶງເອົານາມສະກຸນໄຟລ໌ແທ້ໆຂອງຮູບ ແລະ ບອກປະເພດໄຟລ໌ໃຫ້ Supabase ຮູ້
+    const ext = file.name.split('.').pop();
+    const name = `${Date.now()}.${ext}`;
+    
     try {
-        await window.supabaseClient.storage.from('memories').upload(name, file);
+        // ເພີ່ມການຕັ້ງຄ່າ contentType
+        await window.supabaseClient.storage.from('memories').upload(name, file, {
+            contentType: file.type,
+            upsert: false
+        });
+        
         const { data: url } = window.supabaseClient.storage.from('memories').getPublicUrl(name);
+        
+        // ບັນທຶກລົງຖານຂໍ້ມູນ
         await window.supabaseClient.from('photos').insert([{ image_url: url.publicUrl, caption: cap }]);
+        
         loadGallery();
-    } catch (err) { alert("Error!"); } finally { label.innerHTML = originalText; }
+    } catch (err) { 
+        alert("Error: " + err.message); 
+    } finally { 
+        label.innerHTML = originalText; 
+    }
 }
 
 async function deleteCard() {
