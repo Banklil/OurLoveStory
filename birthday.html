@@ -717,7 +717,8 @@ setTimeout(skipIntro, 4500);
 })();
 
 /* ════════════════════════════════════════
-   STAR + LOVE PARTICLES CANVAS
+   SPARKLE GLITTER STAR CANVAS
+   (Pinterest-style: glitter + stars + diamond sparks)
 ════════════════════════════════════════ */
 const SC = document.getElementById('star-canvas');
 const sx = SC.getContext('2d');
@@ -725,72 +726,163 @@ let W = SC.width = window.innerWidth;
 let H = SC.height = window.innerHeight;
 window.addEventListener('resize',()=>{ W=SC.width=window.innerWidth; H=SC.height=window.innerHeight; });
 
-// Stars
+/* ── Base stars (deep background) ── */
 const stars=[];
-for(let i=0;i<220;i++){
-    const r=Math.random()*1.7+.3;
+for(let i=0;i<280;i++){
+    const r=Math.random()*1.4+.2;
     stars.push({
-        x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight,
-        r, op:Math.random(), ts:Math.random()*.02+.005, td:Math.random()>.5?1:-1,
-        col:Math.random()>.8?'#c8e8ff':Math.random()>.5?'#fff':'#ffe8b0', big:r>1.3,
+        x:Math.random()*W, y:Math.random()*H, r,
+        op:Math.random(), ts:Math.random()*.018+.004,
+        td:Math.random()>.5?1:-1,
+        col:['#fff','#fff','#c8e8ff','#ffe8c0','#ffd6f0'][Math.floor(Math.random()*5)],
     });
 }
 
-// Shooting stars
+/* ── Glitter particles (dense shimmer layer) ── */
+const glitter=[];
+for(let i=0;i<350;i++){
+    glitter.push({
+        x:Math.random()*W, y:Math.random()*H,
+        r:Math.random()*.9+.2,
+        op:Math.random(), ts:Math.random()*.04+.015,
+        td:Math.random()>.5?1:-1,
+        col:['#fff','#ffe9f5','#d4b8ff','#b8d4ff','#ffd700','#ffb3d9'][Math.floor(Math.random()*6)],
+        flash:Math.random()<.08, // 8% chance to be a bright-flash glitter
+        flashTimer:Math.random()*200,
+    });
+}
+
+/* ── Diamond sparkles (4-point star shapes that flash) ── */
+const diamonds=[];
+for(let i=0;i<55;i++){
+    diamonds.push({
+        x:Math.random()*W, y:Math.random()*H,
+        size:Math.random()*5+2,
+        op:0, life:0,
+        maxLife:Math.random()*60+30,
+        col:['#fff','#ffd700','#ffaad4','#c8b4ff'][Math.floor(Math.random()*4)],
+        nextSpawn:Math.random()*120,
+    });
+}
+
+/* ── Shooting stars ── */
 const shoots=[];
 setInterval(()=>{
     shoots.push({
-        x:Math.random()*W*.65, y:Math.random()*H*.4,
-        len:Math.random()*90+55, sp:Math.random()*6+4, op:1,
+        x:Math.random()*W*.7, y:Math.random()*H*.45,
+        len:Math.random()*120+60, sp:Math.random()*7+5, op:1,
+        col:'rgba(255,255,255,.9)',
     });
-}, 4000);
+}, 3200);
 
-// Love particles (falling hearts)
-const LOVE=['❤️','💕','💫','✨','🌸','⭐'];
+/* ── Love particles (falling hearts/flowers) ── */
+const LOVE=['❤️','💕','💫','✨','🌸','⭐','🌟'];
 const loveP=[];
-for(let i=0;i<22;i++){
+for(let i=0;i<20;i++){
     loveP.push({
-        x:Math.random()*window.innerWidth,
-        y:Math.random()*window.innerHeight,
-        size:Math.random()*18+10, sp:Math.random()*1+.35,
-        drift:(Math.random()-.5)*.7, op:Math.random()*.45+.2,
-        rot:0, rs:(Math.random()-.5)*.03,
+        x:Math.random()*W, y:Math.random()*H,
+        size:Math.random()*16+9, sp:Math.random()*.9+.3,
+        drift:(Math.random()-.5)*.6, op:Math.random()*.4+.15,
+        rot:0, rs:(Math.random()-.5)*.025,
         ch:LOVE[Math.floor(Math.random()*LOVE.length)],
     });
+}
+
+/* ── Draw 4-point diamond sparkle ── */
+function drawDiamond(x,y,size,op,col){
+    sx.save(); sx.globalAlpha=op; sx.fillStyle=col;
+    sx.beginPath();
+    sx.moveTo(x, y-size);
+    sx.lineTo(x+size*.3, y);
+    sx.lineTo(x, y+size);
+    sx.lineTo(x-size*.3, y);
+    sx.closePath(); sx.fill();
+    // Cross lines
+    sx.strokeStyle=col; sx.lineWidth=.8; sx.globalAlpha=op*.6;
+    sx.beginPath();
+    sx.moveTo(x-size*1.4,y); sx.lineTo(x+size*1.4,y);
+    sx.moveTo(x,y-size*1.4); sx.lineTo(x,y+size*1.4);
+    sx.stroke();
+    sx.restore();
 }
 
 const RAD=Math.PI/4;
 function drawSC(){
     sx.clearRect(0,0,W,H);
-    // Stars
+
+    /* ── Base stars ── */
     for(const s of stars){
         s.op+=s.ts*s.td;
-        if(s.op>=1){s.op=1;s.td=-1} if(s.op<=.08){s.op=.08;s.td=1}
+        if(s.op>=1){s.op=1;s.td=-1} if(s.op<=.06){s.op=.06;s.td=1}
         sx.save(); sx.globalAlpha=s.op; sx.fillStyle=s.col;
         sx.beginPath(); sx.arc(s.x,s.y,s.r,0,Math.PI*2); sx.fill();
-        if(s.big){
-            sx.globalAlpha=s.op*.4; sx.strokeStyle=s.col; sx.lineWidth=.5;
+        sx.restore();
+    }
+
+    /* ── Glitter layer ── */
+    for(const g of glitter){
+        g.flashTimer--;
+        if(g.flash && g.flashTimer<=0){
+            // Bright flash
+            g.op=1; g.td=-1; g.ts=.06;
+            g.flashTimer=Math.random()*300+150;
+        }
+        g.op+=g.ts*g.td;
+        if(g.op>=1){g.op=1;g.td=-1} if(g.op<=.02){g.op=.02;g.td=1}
+        sx.save(); sx.globalAlpha=g.op; sx.fillStyle=g.col;
+        sx.beginPath(); sx.arc(g.x,g.y,g.r,0,Math.PI*2); sx.fill();
+        // Tiny cross on brighter glitter
+        if(g.op>.6){
+            sx.globalAlpha=g.op*.35; sx.strokeStyle=g.col; sx.lineWidth=.4;
             sx.beginPath();
-            sx.moveTo(s.x-s.r*3,s.y); sx.lineTo(s.x+s.r*3,s.y);
-            sx.moveTo(s.x,s.y-s.r*3); sx.lineTo(s.x,s.y+s.r*3);
+            sx.moveTo(g.x-g.r*2.5,g.y); sx.lineTo(g.x+g.r*2.5,g.y);
+            sx.moveTo(g.x,g.y-g.r*2.5); sx.lineTo(g.x,g.y+g.r*2.5);
             sx.stroke();
         }
         sx.restore();
     }
-    // Shooting stars
+
+    /* ── Diamond sparkles ── */
+    for(const d of diamonds){
+        d.nextSpawn--;
+        if(d.nextSpawn<=0 && d.life===0){
+            d.life=1; d.op=0; d.nextSpawn=0;
+        }
+        if(d.life>0){
+            d.life++;
+            const half=d.maxLife/2;
+            d.op=d.life<half ? d.life/half : (d.maxLife-d.life)/half;
+            d.op=Math.max(0,Math.min(1,d.op));
+            drawDiamond(d.x,d.y,d.size,d.op,d.col);
+            if(d.life>=d.maxLife){
+                d.life=0; d.op=0;
+                d.x=Math.random()*W; d.y=Math.random()*H;
+                d.nextSpawn=Math.random()*180+60;
+                d.size=Math.random()*5+2;
+                d.col=['#fff','#ffd700','#ffaad4','#c8b4ff'][Math.floor(Math.random()*4)];
+            }
+        }
+    }
+
+    /* ── Shooting stars ── */
     for(let i=shoots.length-1;i>=0;i--){
         const ss=shoots[i];
         sx.save(); sx.globalAlpha=ss.op;
-        const g=sx.createLinearGradient(ss.x,ss.y,ss.x-Math.cos(RAD)*ss.len,ss.y-Math.sin(RAD)*ss.len);
-        g.addColorStop(0,'rgba(255,255,255,.9)'); g.addColorStop(1,'rgba(255,255,255,0)');
-        sx.strokeStyle=g; sx.lineWidth=1.6;
+        const g2=sx.createLinearGradient(ss.x,ss.y,ss.x-Math.cos(RAD)*ss.len,ss.y-Math.sin(RAD)*ss.len);
+        g2.addColorStop(0,'rgba(255,255,255,.95)'); g2.addColorStop(1,'rgba(255,255,255,0)');
+        sx.strokeStyle=g2; sx.lineWidth=1.8;
         sx.beginPath(); sx.moveTo(ss.x,ss.y);
         sx.lineTo(ss.x-Math.cos(RAD)*ss.len,ss.y-Math.sin(RAD)*ss.len);
-        sx.stroke(); sx.restore();
+        sx.stroke();
+        // Sparkle at head
+        sx.globalAlpha=ss.op*.8; sx.fillStyle='#fff';
+        sx.beginPath(); sx.arc(ss.x,ss.y,2,0,Math.PI*2); sx.fill();
+        sx.restore();
         ss.x+=Math.cos(RAD)*ss.sp; ss.y+=Math.sin(RAD)*ss.sp;
-        ss.op-=.016; if(ss.op<=0) shoots.splice(i,1);
+        ss.op-=.014; if(ss.op<=0) shoots.splice(i,1);
     }
-    // Love particles
+
+    /* ── Love particles ── */
     for(const p of loveP){
         sx.save(); sx.globalAlpha=p.op;
         sx.translate(p.x,p.y); sx.rotate(p.rot);
@@ -799,6 +891,7 @@ function drawSC(){
         p.y+=p.sp; p.x+=p.drift; p.rot+=p.rs;
         if(p.y>H+30){ p.y=-30; p.x=Math.random()*W; }
     }
+
     requestAnimationFrame(drawSC);
 }
 drawSC();
