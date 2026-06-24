@@ -778,17 +778,70 @@ setInterval(()=>{
     });
 }, 3200);
 
-/* ── Love particles (falling hearts/flowers) ── */
-const LOVE=['❤️','💕','💫','✨','🌸','⭐','🌟'];
-const loveP=[];
-for(let i=0;i<20;i++){
-    loveP.push({
+/* ── Starburst / lens-flare falling particles ── */
+const starbursts=[];
+for(let i=0;i<28;i++){
+    starbursts.push({
         x:Math.random()*W, y:Math.random()*H,
-        size:Math.random()*16+9, sp:Math.random()*.9+.3,
-        drift:(Math.random()-.5)*.6, op:Math.random()*.4+.15,
-        rot:0, rs:(Math.random()-.5)*.025,
-        ch:LOVE[Math.floor(Math.random()*LOVE.length)],
+        size:Math.random()*5+2,
+        sp:Math.random()*.55+.18,
+        drift:(Math.random()-.5)*.45,
+        baseOp:Math.random()*.45+.15,
+        tw:Math.random(), tws:Math.random()*.022+.006, twd:Math.random()>.5?1:-1,
     });
+}
+
+/* ── Draw lens-flare starburst (matches shared image) ── */
+function drawStarburst(x,y,size,op){
+    if(op<=0.01) return;
+    sx.save();
+    // Outer halo glow
+    const halo=sx.createRadialGradient(x,y,0,x,y,size*7);
+    halo.addColorStop(0,`rgba(255,255,255,${op*.35})`);
+    halo.addColorStop(.4,`rgba(220,230,255,${op*.12})`);
+    halo.addColorStop(1,'rgba(255,255,255,0)');
+    sx.fillStyle=halo;
+    sx.beginPath(); sx.arc(x,y,size*7,0,Math.PI*2); sx.fill();
+
+    // Long cross rays (horizontal slightly longer, vertical taller)
+    const rays=[
+        {a:0,        len:size*16,  w:size*.55},
+        {a:Math.PI,  len:size*16,  w:size*.55},
+        {a:-Math.PI/2,len:size*22, w:size*.5},
+        {a:Math.PI/2, len:size*22, w:size*.5},
+        // diagonal medium
+        {a:Math.PI/4,    len:size*8,  w:size*.22},
+        {a:-Math.PI/4,   len:size*8,  w:size*.22},
+        {a:3*Math.PI/4,  len:size*8,  w:size*.22},
+        {a:-3*Math.PI/4, len:size*8,  w:size*.22},
+        // thin fan rays
+        {a:Math.PI/8,    len:size*5.5,w:size*.12},
+        {a:-Math.PI/8,   len:size*5.5,w:size*.12},
+        {a:3*Math.PI/8,  len:size*5,  w:size*.12},
+        {a:-3*Math.PI/8, len:size*5,  w:size*.12},
+        {a:5*Math.PI/8,  len:size*5,  w:size*.12},
+        {a:-5*Math.PI/8, len:size*5,  w:size*.12},
+        {a:7*Math.PI/8,  len:size*5.5,w:size*.12},
+        {a:-7*Math.PI/8, len:size*5.5,w:size*.12},
+    ];
+    for(const r of rays){
+        const ex=x+Math.cos(r.a)*r.len, ey=y+Math.sin(r.a)*r.len;
+        const rg=sx.createLinearGradient(x,y,ex,ey);
+        rg.addColorStop(0,`rgba(255,255,255,${op*.92})`);
+        rg.addColorStop(.25,`rgba(255,255,255,${op*.5})`);
+        rg.addColorStop(1,'rgba(255,255,255,0)');
+        sx.strokeStyle=rg; sx.lineWidth=Math.max(.3,r.w);
+        sx.beginPath(); sx.moveTo(x,y); sx.lineTo(ex,ey); sx.stroke();
+    }
+    // Bright center core
+    sx.shadowBlur=size*9; sx.shadowColor='#fff';
+    const core=sx.createRadialGradient(x,y,0,x,y,size*1.6);
+    core.addColorStop(0,`rgba(255,255,255,${op})`);
+    core.addColorStop(.5,`rgba(220,235,255,${op*.75})`);
+    core.addColorStop(1,'rgba(255,255,255,0)');
+    sx.fillStyle=core;
+    sx.beginPath(); sx.arc(x,y,size*1.6,0,Math.PI*2); sx.fill();
+    sx.restore();
 }
 
 /* ── Draw 4-point diamond sparkle with glow ── */
@@ -889,14 +942,14 @@ function drawSC(){
         ss.op-=.014; if(ss.op<=0) shoots.splice(i,1);
     }
 
-    /* ── Love particles ── */
-    for(const p of loveP){
-        sx.save(); sx.globalAlpha=p.op;
-        sx.translate(p.x,p.y); sx.rotate(p.rot);
-        sx.font=p.size+'px serif'; sx.fillText(p.ch,0,0);
-        sx.restore();
-        p.y+=p.sp; p.x+=p.drift; p.rot+=p.rs;
-        if(p.y>H+30){ p.y=-30; p.x=Math.random()*W; }
+    /* ── Starburst falling particles ── */
+    for(const sb of starbursts){
+        sb.tw+=sb.tws*sb.twd;
+        if(sb.tw>=1){sb.tw=1;sb.twd=-1;}
+        if(sb.tw<=0){sb.tw=0;sb.twd=1;}
+        drawStarburst(sb.x, sb.y, sb.size, sb.baseOp*sb.tw);
+        sb.y+=sb.sp; sb.x+=sb.drift;
+        if(sb.y>H+60){ sb.y=-60; sb.x=Math.random()*W; }
     }
 
     requestAnimationFrame(drawSC);
