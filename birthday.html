@@ -681,14 +681,14 @@ body{
    ★  CONFIG  ★  — ແກ້ໄຂ 1 ບ່ອນ
 ════════════════════════════════════════ */
 const CFG = {
-    WHATSAPP_NUM: '+8562057022972',   // ເບີ CHI
-    BD_MONTH: 8,  // August
-    BD_DAY:   18,
+    WHATSAPP_NUM: '+8562077481570',   // ເບີ CHI
+    BD_MONTH: 6,  // August
+    BD_DAY:   24,
 };
 
 /* ─── WHATSAPP LINK ─── */
 (function(){
-    const msg = encodeURIComponent('🎂 ສຸຂສັນວັນເກີດ CHI! Happy Birthday ❤️\n\n' + window.location.href);
+    const msg = encodeURIComponent('Happy Birthday I Tui ❤️\n\n' + window.location.href);
     document.getElementById('wa-link').href = 'https://wa.me/' + CFG.WHATSAPP_NUM.replace(/\D/g,'') + '?text=' + msg;
 })();
 
@@ -787,8 +787,11 @@ let ws=0;
 setInterval(()=>{ ws+=.22; wt.setAttribute('seed',ws%1000); },90);
 
 /* ════════════════════════════════════════
-   COUNTDOWN (every year)
+   COUNTDOWN (every year)  +  PREVIEW MODE
+   ─ ໃຊ້ ?preview ໃນ URL ເພື່ອທົດສອບ ─
 ════════════════════════════════════════ */
+const IS_PREVIEW = new URLSearchParams(window.location.search).has('preview');
+
 function getNextBD(){
     const now=new Date(), y=now.getFullYear();
     let bd=new Date(y,CFG.BD_MONTH-1,CFG.BD_DAY,0,0,0);
@@ -796,18 +799,19 @@ function getNextBD(){
     return bd;
 }
 let celebFired=false;
+function showBirthdayMode(y){
+    document.getElementById('countdown').innerHTML=
+        '<div style="font-size:1.7rem;color:#f5d890;font-family:\'Dancing Script\',cursive;line-height:1.5">'
+        +'🎂 ສຸຂສັນວັນເກີດ CHI! ❤️<br>'
+        +'<span style="font-size:.9rem;color:rgba(255,255,255,.5)">'+y+'</span></div>';
+    if(!celebFired){ celebFired=true; setTimeout(launchConfetti,800); }
+}
 function tick(){
+    if(IS_PREVIEW){ showBirthdayMode('PREVIEW'); return; }
     const now=new Date(), y=now.getFullYear();
     const bdStart=new Date(y,CFG.BD_MONTH-1,CFG.BD_DAY,0,0,0);
     const bdEnd  =new Date(y,CFG.BD_MONTH-1,CFG.BD_DAY,23,59,59);
-    if(now>=bdStart && now<=bdEnd){
-        document.getElementById('countdown').innerHTML=
-            '<div style="font-size:1.7rem;color:#f5d890;font-family:\'Dancing Script\',cursive;line-height:1.5">'
-            +'🎂 ສຸຂສັນວັນເກີດ CHI! ❤️<br>'
-            +'<span style="font-size:.9rem;color:rgba(255,255,255,.5)">'+y+'</span></div>';
-        if(!celebFired){ celebFired=true; launchConfetti(); }
-        return;
-    }
+    if(now>=bdStart && now<=bdEnd){ showBirthdayMode(y); return; }
     const diff=getNextBD()-now;
     document.getElementById('cd-d').textContent=Math.floor(diff/864e5);
     document.getElementById('cd-h').textContent=Math.floor(diff%864e5/36e5);
@@ -862,12 +866,12 @@ drawCursor();
    STORY VIEWER
 ════════════════════════════════════════ */
 const STORIES=[
-    {src:'1.png',lbl:'ວັນທໍາອິດ · The First Day'},
-    {src:'2.png',lbl:'ຮ່ວມກັນ · Together'},
-    {src:'3.png',lbl:'ຄວາມສຸກ · Happiness'},
-    {src:'4.png',lbl:'ລູ້ຟ້າ · Floating Sky'},
-    {src:'5.png',lbl:'ຮັກແທ້ · True Love'},
-    {src:'6.png',lbl:'ຕະຫຼອດໄປ · Forever'},
+    {src:'1.png',lbl:'The First Day'},
+    {src:'2.png',lbl:' Together'},
+    {src:'3.png',lbl:' Happiness'},
+    {src:'4.png',lbl:' Floating Sky'},
+    {src:'5.png',lbl:' True Love'},
+    {src:'6.png',lbl:' Forever'},
 ];
 let stIdx=0, stTimer=null;
 const svEl=document.getElementById('sv');
