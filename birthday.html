@@ -593,84 +593,9 @@ body{
       <h2>Museum of Our Memories</h2>
       <div class="sec-div"><span>✦ ຄວາມຊົງຈໍາຂອງເຮົາ ✦</span></div>
     </div>
-    <div class="space-gallery">
-      <div class="spf-wrap hidden">
-        <div class="spf sf1" onclick="openLB('1.png')">
-          <img src="1.png" alt="ວັນທໍາອິດ" loading="lazy">
-          <div class="fp"><div class="ft">ວັນທໍາອິດ</div><div class="fn">EXHIBIT · I</div></div>
-        </div>
-      </div>
-      <div class="spf-wrap hidden">
-        <div class="spf sf2" onclick="openLB('cc1.jpeg')">
-          <img src="cc1.jpeg" alt="ຊ່ວງເວລາ" loading="lazy">
-          <div class="fp"><div class="ft">ຊ່ວງເວລາ</div><div class="fn">EXHIBIT · II</div></div>
-        </div>
-      </div>
-      <div class="spf-wrap hidden">
-        <div class="spf sf3" onclick="openLB('2.png')">
-          <img src="2.png" alt="ຮ່ວມກັນ" loading="lazy">
-          <div class="fp"><div class="ft">ຮ່ວມກັນ</div><div class="fn">EXHIBIT · III</div></div>
-        </div>
-      </div>
-      <div class="spf-wrap hidden">
-        <div class="spf sf4" onclick="openLB('videoframe_5071.png')">
-          <img src="videoframe_5071.png" alt="ຄວາມຮັກ" loading="lazy">
-          <div class="fp"><div class="ft">ຄວາມຮັກ</div><div class="fn">EXHIBIT · IV</div></div>
-        </div>
-      </div>
-      <div class="spf-wrap hidden">
-        <div class="spf sf5" onclick="openLB('3.png')">
-          <img src="3.png" alt="ຄວາມສຸກ" loading="lazy">
-          <div class="fp"><div class="ft">ຄວາມສຸກ</div><div class="fn">EXHIBIT · V</div></div>
-        </div>
-      </div>
-      <div class="spf-wrap hidden">
-        <div class="spf sf6" onclick="openLB('cc2.jpeg')">
-          <img src="cc2.jpeg" alt="ດ້ວຍກັນ" loading="lazy">
-          <div class="fp"><div class="ft">ດ້ວຍກັນ</div><div class="fn">EXHIBIT · VI</div></div>
-        </div>
-      </div>
-      <div class="spf-wrap hidden">
-        <div class="spf sf7" onclick="openLB('4.png')">
-          <img src="4.png" alt="ລູ້ຟ້າ" loading="lazy">
-          <div class="fp"><div class="ft">ລູ້ຟ້າ</div><div class="fn">EXHIBIT · VII</div></div>
-        </div>
-      </div>
-      <div class="spf-wrap hidden">
-        <div class="spf sf8" onclick="openLB('videoframe_10353.png')">
-          <img src="videoframe_10353.png" alt="ຕ້ອງໃຈ" loading="lazy">
-          <div class="fp"><div class="ft">ຕ້ອງໃຈ</div><div class="fn">EXHIBIT · VIII</div></div>
-        </div>
-      </div>
-      <div class="spf-wrap hidden">
-        <div class="spf sf9" onclick="openLB('5.png')">
-          <img src="5.png" alt="ຮັກແທ້" loading="lazy">
-          <div class="fp"><div class="ft">ຮັກແທ້</div><div class="fn">EXHIBIT · IX</div></div>
-        </div>
-      </div>
-      <div class="spf-wrap hidden">
-        <div class="spf sf10" onclick="openLB('cc3.jpeg')">
-          <img src="cc3.jpeg" alt="ຄວາມຊົງຈຳ" loading="lazy">
-          <div class="fp"><div class="ft">ຄວາມຊົງຈຳ</div><div class="fn">EXHIBIT · X</div></div>
-        </div>
-      </div>
-      <div class="spf-wrap hidden">
-        <div class="spf sf11" onclick="openLB('6.png')">
-          <img src="6.png" alt="ຕະຫຼອດໄປ" loading="lazy">
-          <div class="fp"><div class="ft">ຕະຫຼອດໄປ</div><div class="fn">EXHIBIT · XI</div></div>
-        </div>
-      </div>
-      <div class="spf-wrap hidden">
-        <div class="spf sf12" onclick="openLB('cc4.jpeg')">
-          <img src="cc4.jpeg" alt="ທຸກທຸກວັນ" loading="lazy">
-          <div class="fp"><div class="ft">ທຸກທຸກວັນ</div><div class="fn">EXHIBIT · XII</div></div>
-        </div>
-      </div>
-      <div class="spf-wrap hidden">
-        <div class="spf sf13" onclick="openLB('videoframe_13130.png')">
-          <img src="videoframe_13130.png" alt="ຕ່ອນໜຶ່ງ" loading="lazy">
-          <div class="fp"><div class="ft">ຕ່ອນໜຶ່ງ</div><div class="fn">EXHIBIT · XIII</div></div>
-        </div>
+    <div class="space-gallery" id="space-gallery">
+      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:rgba(201,168,76,.6);font-size:.95rem;letter-spacing:.15em">
+        ✦ ກຳລັງໂຫຼດຮູບ... ✦
       </div>
     </div>
   </section>
@@ -748,6 +673,7 @@ body{
   <source src="New West - Those Eyes (Lyrics).mp3" type="audio/mpeg">
 </audio>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script>
 /* ════════════════════════════════════════
@@ -1197,8 +1123,59 @@ function revealObs(el,delay){
         if(e.isIntersecting){ setTimeout(()=>el.classList.remove('hidden'),delay||0); }
     },{threshold:.1}).observe(el);
 }
-document.querySelectorAll('.spf-wrap').forEach((el,i)=>revealObs(el,i*110));
 revealObs(document.getElementById('letter-card'),0);
+
+/* ════════════════════════════════════════
+   SUPABASE GALLERY (ດຶງຮູບຈາກ Supabase)
+════════════════════════════════════════ */
+const SB_URL='https://fxhmjhwhpbvtflrhsofq.supabase.co';
+const SB_KEY='sb_publishable_sEN55L7TBNlWnsXd3_cnfg_6t3_p0w9';
+const sbClient=window.supabase.createClient(SB_URL,SB_KEY);
+
+const SF_CLS=['sf1','sf2','sf3','sf4','sf5','sf6','sf7','sf8','sf9','sf10','sf11','sf12','sf13'];
+const ROMANS=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'];
+
+async function loadSpaceGallery(){
+    const gallery=document.getElementById('space-gallery');
+    if(!gallery) return;
+    try{
+        const {data,error}=await sbClient.from('photos').select('*').order('created_at',{ascending:true});
+        if(error||!data||data.length===0){
+            gallery.innerHTML='<div style="text-align:center;padding:40px;color:rgba(201,168,76,.5)">ຍັງບໍ່ມີຮູບໃນ Supabase</div>';
+            return;
+        }
+        gallery.innerHTML='';
+        data.forEach((photo,i)=>{
+            const fc=SF_CLS[i%SF_CLS.length];
+            const cap=photo.caption||'';
+            const num=ROMANS[i]||String(i+1);
+            const wrap=document.createElement('div');
+            wrap.className='spf-wrap hidden';
+            const inner=document.createElement('div');
+            inner.className=`spf ${fc}`;
+            inner.onclick=()=>openLB(photo.image_url);
+            inner.innerHTML=`<img src="${photo.image_url}" alt="${cap}" loading="lazy">`
+                +(cap?`<div class="fp"><div class="ft">${cap}</div><div class="fn">EXHIBIT · ${num}</div></div>`:'');
+            wrap.appendChild(inner);
+            gallery.appendChild(wrap);
+            revealObs(wrap,i*100);
+        });
+    }catch(e){
+        gallery.innerHTML='<div style="text-align:center;padding:40px;color:rgba(255,100,100,.6)">ດຶງຮູບບໍ່ໄດ້ — ກວດ network</div>';
+        console.error('Gallery load error:',e);
+    }
+}
+
+/* ── trigger ເມື່ອ scroll ຮອດ gallery section ── */
+(function(){
+    const sec=document.querySelector('.gallery-section');
+    if(!sec) return;
+    let loaded=false;
+    const obs=new IntersectionObserver(([e])=>{
+        if(e.isIntersecting&&!loaded){ loaded=true; loadSpaceGallery(); obs.disconnect(); }
+    },{threshold:.05});
+    obs.observe(sec);
+})();
 
 let cDone=false;
 new IntersectionObserver(([e])=>{
