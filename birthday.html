@@ -277,20 +277,25 @@ body{
 .sec-div::after{background:linear-gradient(90deg,var(--gold),transparent)}
 .sec-div span{font-size:.74rem;color:rgba(201,168,76,.7);letter-spacing:.28em}
 
-/* ── Space-floating masonry gallery ── */
+/* ── Space-floating free-form gallery ── */
 .space-gallery{
-  column-count:2;column-gap:12px;
-  max-width:1000px;margin:0 auto;padding:0 8px;
+  position:relative;
+  max-width:1100px;margin:0 auto;padding:0 6px;
+  /* height set by JS */
 }
-@media(min-width:640px){.space-gallery{column-count:3}}
-@media(min-width:960px){.space-gallery{column-count:4}}
-
 .spf-wrap{
-  break-inside:avoid;display:inline-block;
-  width:100%;margin-bottom:12px;
-  transition:opacity .75s ease,transform .75s ease;
+  position:absolute;
+  cursor:grab;
+  user-select:none;-webkit-user-select:none;
+  opacity:0;transition:opacity .6s ease;
+  touch-action:none;
 }
-.spf-wrap.hidden{opacity:0;transform:translateY(32px)}
+.spf-wrap.vis{opacity:1}
+.spf-wrap.dragging{
+  cursor:grabbing;
+  transition:none;
+  filter:drop-shadow(0 0 18px rgba(201,168,76,.7));
+}
 
 .spf{
   position:relative;background:rgba(6,2,28,.82);
@@ -1135,34 +1140,103 @@ const sbClient=window.supabase.createClient(SB_URL,SB_KEY);
 const SF_CLS=['sf1','sf2','sf3','sf4','sf5','sf6','sf7','sf8','sf9','sf10','sf11','sf12','sf13'];
 const ROMANS=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'];
 
+/* ── Global drag system ── */
+let _dragEl=null, _dragSX=0, _dragSY=0, _dragOL=0, _dragOT=0, _dragMoved=false, _dragZ=200;
+
+function _onPointerMove(e){
+    if(!_dragEl) return;
+    e.preventDefault();
+    const t=e.touches?e.touches[0]:e;
+    const dx=t.clientX-_dragSX, dy=t.clientY-_dragSY;
+    if(Math.abs(dx)>4||Math.abs(dy)>4) _dragMoved=true;
+    _dragEl.style.left=(_dragOL+dx)+'px';
+    _dragEl.style.top =(_dragOT+dy)+'px';
+}
+function _onPointerUp(){
+    if(!_dragEl) return;
+    _dragEl.classList.remove('dragging');
+    _dragEl=null;
+}
+window.addEventListener('mousemove',_onPointerMove);
+window.addEventListener('touchmove',_onPointerMove,{passive:false});
+window.addEventListener('mouseup',_onPointerUp);
+window.addEventListener('touchend',_onPointerUp);
+
+function makeDraggable(wrap, onClickFn){
+    function start(e){
+        if(e.button&&e.button!==0) return;
+        const t=e.touches?e.touches[0]:e;
+        _dragEl=wrap; _dragMoved=false;
+        _dragSX=t.clientX; _dragSY=t.clientY;
+        _dragOL=parseInt(wrap.style.left)||0;
+        _dragOT=parseInt(wrap.style.top)||0;
+        wrap.style.zIndex=++_dragZ;
+        wrap.classList.add('dragging');
+        e.preventDefault();
+    }
+    wrap.addEventListener('mousedown',start);
+    wrap.addEventListener('touchstart',start,{passive:false});
+    wrap.addEventListener('click',()=>{ if(!_dragMoved) onClickFn(); });
+}
+
 async function loadSpaceGallery(){
     const gallery=document.getElementById('space-gallery');
     if(!gallery) return;
     try{
         const {data,error}=await sbClient.from('photos').select('*').order('created_at',{ascending:true});
         if(error||!data||data.length===0){
-            gallery.innerHTML='<div style="text-align:center;padding:40px;color:rgba(201,168,76,.5)">ຍັງບໍ່ມີຮູບໃນ Supabase</div>';
+            gallery.innerHTML='<div style="text-align:center;padding:60px;color:rgba(201,168,76,.5)">ຍັງບໍ່ມີຮູບໃນ Supabase</div>';
             return;
         }
         gallery.innerHTML='';
+
+        /* ── Masonry-style initial positions (absolute) ── */
+        const totalW=gallery.offsetWidth||window.innerWidth-20;
+        const cols=totalW<500?2:totalW<800?3:4;
+        const gap=12;
+        const cardW=Math.floor((totalW-(cols+1)*gap)/cols);
+        const colH=Array(cols).fill(gap);
+
         data.forEach((photo,i)=>{
             const fc=SF_CLS[i%SF_CLS.length];
             const cap=photo.caption||'';
             const num=ROMANS[i]||String(i+1);
+
+            /* shortest column */
+            const c=colH.indexOf(Math.min(...colH));
+            const left=gap+c*(cardW+gap);
+            const top=colH[c];
+
             const wrap=document.createElement('div');
-            wrap.className='spf-wrap hidden';
+            wrap.className='spf-wrap';
+            wrap.style.left=left+'px';
+            wrap.style.top=top+'px';
+            wrap.style.width=cardW+'px';
+
             const inner=document.createElement('div');
             inner.className=`spf ${fc}`;
-            inner.onclick=()=>openLB(photo.image_url);
-            inner.innerHTML=`<img src="${photo.image_url}" alt="${cap}" loading="lazy">`
+            inner.innerHTML=`<img src="${photo.image_url}" alt="${cap}" loading="lazy" style="width:100%;display:block;object-fit:cover">`
                 +(cap?`<div class="fp"><div class="ft">${cap}</div><div class="fn">EXHIBIT · ${num}</div></div>`:'');
             wrap.appendChild(inner);
             gallery.appendChild(wrap);
-            revealObs(wrap,i*100);
+
+            /* estimate height: image (4:3 ratio) + plate */
+            const estH=Math.round(cardW*(4/3))+(cap?44:0)+14;
+            colH[c]+=estH+gap;
+
+            /* fade in */
+            setTimeout(()=>wrap.classList.add('vis'), 80+i*90);
+
+            /* drag */
+            makeDraggable(wrap, ()=>openLB(photo.image_url));
         });
-    }catch(e){
+
+        /* set container height */
+        gallery.style.height=(Math.max(...colH)+gap)+'px';
+
+    }catch(err){
         gallery.innerHTML='<div style="text-align:center;padding:40px;color:rgba(255,100,100,.6)">ດຶງຮູບບໍ່ໄດ້ — ກວດ network</div>';
-        console.error('Gallery load error:',e);
+        console.error('Gallery load error:',err);
     }
 }
 
@@ -1173,7 +1247,7 @@ async function loadSpaceGallery(){
     let loaded=false;
     const obs=new IntersectionObserver(([e])=>{
         if(e.isIntersecting&&!loaded){ loaded=true; loadSpaceGallery(); obs.disconnect(); }
-    },{threshold:.05});
+    },{threshold:.03});
     obs.observe(sec);
 })();
 
