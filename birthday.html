@@ -80,19 +80,23 @@ body{
 
 /* ══════════════ MOON ══════════════ */
 .moon{
-  position:fixed;top:5vh;right:7vw;
-  width:clamp(85px,17vw,155px);height:clamp(85px,17vw,155px);
-  border-radius:50%;
-  background:radial-gradient(circle at 38% 35%,#fffbe8,#fce88a 40%,#e8b840 80%,#c48a20 100%);
+  position:fixed;top:2vh;right:3vw;
+  width:clamp(160px,28vw,340px);height:clamp(160px,28vw,340px);
+  border-radius:50%;overflow:hidden;
+  background:#111;
   box-shadow:
-    0 0 18px 6px rgba(245,216,144,.65),
-    0 0 60px 20px rgba(245,216,144,.3),
-    0 0 140px 55px rgba(245,216,144,.12),
-    0 0 260px 110px rgba(245,216,144,.06);
+    0 0 30px 10px rgba(200,210,255,.18),
+    0 0 80px 30px rgba(180,190,255,.1),
+    0 0 180px 70px rgba(150,160,220,.07);
   z-index:1;animation:moonFloat 9s ease-in-out infinite alternate;
 }
-.moon::before{content:'';position:absolute;width:22%;height:22%;border-radius:50%;background:rgba(160,110,30,.35);top:22%;left:18%}
-.moon::after{content:'';position:absolute;width:13%;height:13%;border-radius:50%;background:rgba(160,110,30,.25);top:58%;left:58%}
+.moon img{
+  width:100%;height:100%;object-fit:cover;
+  border-radius:50%;display:block;
+  filter:brightness(1.05) contrast(1.08);
+}
+.moon::before{display:none}
+.moon::after{display:none}
 @keyframes moonFloat{from{transform:translateY(0);filter:brightness(1)}to{transform:translateY(-14px);filter:brightness(1.18)}}
 
 /* ══════════════ PAGE WRAP ══════════════ */
@@ -548,7 +552,7 @@ body{
 <canvas id="cursor-canvas"></canvas>
 
 <!-- ══ MOON ══ -->
-<div class="moon"></div>
+<div class="moon"><img src="moon.jpg" alt="moon"></div>
 
 <!-- ════════════ PAGE CONTENT ════════════ -->
 <div class="page-wrap">
