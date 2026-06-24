@@ -292,9 +292,32 @@ body{
 }
 .spf-wrap.vis{opacity:1}
 .spf-wrap.dragging{
-  cursor:grabbing;
+  cursor:grabbing !important;
   transition:none;
-  filter:drop-shadow(0 0 18px rgba(201,168,76,.7));
+  z-index:9999;
+}
+.spf-wrap.dragging .spf{
+  animation-play-state:paused !important;
+  transform:scale(1.08) rotate(2.5deg) !important;
+  box-shadow:
+    0 28px 80px rgba(0,0,0,.88),
+    0 0 50px rgba(201,168,76,.65),
+    0 0 100px rgba(201,168,76,.2) !important;
+  transition:transform .12s ease, box-shadow .12s ease !important;
+}
+.spf-wrap.drop-bounce .spf{
+  animation:dropBounce .45s cubic-bezier(.34,1.56,.64,1) forwards !important;
+}
+@keyframes dropBounce{
+  0%  {transform:scale(1.08) rotate(2.5deg)}
+  45% {transform:scale(1.04) rotate(-0.8deg)}
+  72% {transform:scale(0.97) rotate(0.3deg)}
+  100%{transform:scale(1)    rotate(0deg)}
+}
+/* broken image placeholder */
+.spf img.broken{
+  background:linear-gradient(135deg,#1a0a2e,#0d0020);
+  min-height:120px;display:block;
 }
 
 .spf{
@@ -1154,8 +1177,11 @@ function _onPointerMove(e){
 }
 function _onPointerUp(){
     if(!_dragEl) return;
-    _dragEl.classList.remove('dragging');
+    const el=_dragEl;
     _dragEl=null;
+    el.classList.remove('dragging');
+    el.classList.add('drop-bounce');
+    setTimeout(()=>el.classList.remove('drop-bounce'),480);
 }
 window.addEventListener('mousemove',_onPointerMove);
 window.addEventListener('touchmove',_onPointerMove,{passive:false});
@@ -1215,7 +1241,8 @@ async function loadSpaceGallery(){
 
             const inner=document.createElement('div');
             inner.className=`spf ${fc}`;
-            inner.innerHTML=`<img src="${photo.image_url}" alt="${cap}" loading="lazy" style="width:100%;display:block;object-fit:cover">`
+            const safeUrl=photo.image_url||'';
+            inner.innerHTML=`<img src="${safeUrl}" alt="${cap}" loading="lazy" style="width:100%;display:block;object-fit:cover;min-height:80px" onerror="this.classList.add('broken');this.style.minHeight='100px'">`
                 +(cap?`<div class="fp"><div class="ft">${cap}</div><div class="fn">EXHIBIT · ${num}</div></div>`:'');
             wrap.appendChild(inner);
             gallery.appendChild(wrap);
