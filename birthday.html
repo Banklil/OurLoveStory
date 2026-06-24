@@ -780,14 +780,15 @@ setInterval(()=>{
 
 /* ── Starburst / lens-flare falling particles ── */
 const starbursts=[];
-for(let i=0;i<28;i++){
+for(let i=0;i<40;i++){
+    const big=i<8; // first 8 are large hero bursts
     starbursts.push({
         x:Math.random()*W, y:Math.random()*H,
-        size:Math.random()*5+2,
-        sp:Math.random()*.55+.18,
-        drift:(Math.random()-.5)*.45,
-        baseOp:Math.random()*.45+.15,
-        tw:Math.random(), tws:Math.random()*.022+.006, twd:Math.random()>.5?1:-1,
+        size: big ? Math.random()*8+7 : Math.random()*5+3,
+        sp:Math.random()*.5+.15,
+        drift:(Math.random()-.5)*.4,
+        baseOp: big ? Math.random()*.3+.55 : Math.random()*.4+.25,
+        tw:Math.random()*.4+.35, tws:Math.random()*.018+.005, twd:Math.random()>.5?1:-1,
     });
 }
 
@@ -946,10 +947,10 @@ function drawSC(){
     for(const sb of starbursts){
         sb.tw+=sb.tws*sb.twd;
         if(sb.tw>=1){sb.tw=1;sb.twd=-1;}
-        if(sb.tw<=0){sb.tw=0;sb.twd=1;}
+        if(sb.tw<=0.28){sb.tw=0.28;sb.twd=1;}
         drawStarburst(sb.x, sb.y, sb.size, sb.baseOp*sb.tw);
         sb.y+=sb.sp; sb.x+=sb.drift;
-        if(sb.y>H+60){ sb.y=-60; sb.x=Math.random()*W; }
+        if(sb.y>H+80){ sb.y=-80; sb.x=Math.random()*W; }
     }
 
     requestAnimationFrame(drawSC);
