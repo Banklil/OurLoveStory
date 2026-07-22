@@ -1171,7 +1171,7 @@ function nextStory(){ if(stIdx<STORIES.length-1){ stIdx++; renderStory(); }else 
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeStory(); closeLB(); } });
 
 /* ── Story groups (5 highlights) ── */
-const GROUP_LABELS=['ເລີ່ມຕົ້ນ','ຄວາມສຸກ','ຄວາມຮັກ','ຊ່ວງເວລາ','ຕະຫຼອດໄປ'];
+const GROUP_LABELS=['star','some time','when you with me','time zone','never'];
 let STORY_GROUPS=[];   // array of 5 arrays, each = [{src,lbl},...]
 
 function openGroup(gi){
