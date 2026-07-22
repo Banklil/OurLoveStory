@@ -1170,29 +1170,51 @@ function nextStory(){ if(stIdx<STORIES.length-1){ stIdx++; renderStory(); }else 
 
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeStory(); closeLB(); } });
 
+/* ── Story groups (5 highlights) ── */
+const GROUP_LABELS=['ເລີ່ມຕົ້ນ','ຄວາມສຸກ','ຄວາມຮັກ','ຊ່ວງເວລາ','ຕະຫຼອດໄປ'];
+let STORY_GROUPS=[];   // array of 5 arrays, each = [{src,lbl},...]
+
+function openGroup(gi){
+    if(!STORY_GROUPS[gi]||!STORY_GROUPS[gi].length) return;
+    STORIES=STORY_GROUPS[gi];
+    stIdx=0;
+    buildBars();
+    svEl.classList.add('open');
+    renderStory();
+}
+
 /* ── Load stories from Supabase ── */
 async function initStories(){
     const ringsEl=document.getElementById('story-rings');
+    let allPhotos=[];
     try{
         const {data,error}=await sbClient.from('photos').select('*').order('created_at',{ascending:true});
         if(error||!data||!data.length) throw new Error('no data');
-        STORIES=data.map(p=>({src:p.image_url||'',lbl:p.caption||''}));
+        allPhotos=data.map(p=>({src:p.image_url||'',lbl:p.caption||''}));
     }catch(e){
-        STORIES=[
+        allPhotos=[
             {src:'1.png',lbl:'ວັນທໍາອິດ'},{src:'2.png',lbl:'ຮ່ວມກັນ'},
             {src:'3.png',lbl:'ຄວາມສຸກ'},{src:'4.png',lbl:'ລູ້ຟ້າ'},
             {src:'5.png',lbl:'ຮັກແທ້'},{src:'6.png',lbl:'ຕະຫຼອດໄປ'},
         ];
     }
-    // Build rings
-    if(ringsEl){
-        ringsEl.innerHTML=STORIES.map((s,i)=>`
-            <div class="s-ring-wrap" onclick="openStory(${i})">
-                <div class="s-ring"><img src="${s.src}" alt="${s.lbl}" loading="lazy" onerror="this.src='1.png'"></div>
-                <div class="s-ring-lbl">${s.lbl||''}</div>
-            </div>`).join('');
+    // Split all photos evenly into 5 groups
+    const total=allPhotos.length;
+    const size=Math.ceil(total/5);
+    STORY_GROUPS=[];
+    for(let i=0;i<5;i++){
+        STORY_GROUPS.push(allPhotos.slice(i*size,(i+1)*size));
     }
-    buildBars();
+    // Build 5 rings
+    if(ringsEl){
+        ringsEl.innerHTML=STORY_GROUPS.map((grp,gi)=>{
+            const cover=grp[0]||{src:'1.png',lbl:''};
+            return `<div class="s-ring-wrap" onclick="openGroup(${gi})">
+                <div class="s-ring"><img src="${cover.src}" alt="${GROUP_LABELS[gi]}" loading="lazy" onerror="this.src='1.png'"></div>
+                <div class="s-ring-lbl">${GROUP_LABELS[gi]}<br><span style="font-size:.65rem;opacity:.65">${grp.length} ຮູບ</span></div>
+            </div>`;
+        }).join('');
+    }
 }
 
 /* ════════════════════════════════════════
