@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Happy Birthday CHI 🎂❤️</title>
+<title>Happy Birthday stinky ❤️</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Lao:wght@300;400;700&family=Noto+Sans+Lao:wght@300;400;700&family=Playfair+Display:ital,wght@0,700;1,400&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 <style>
@@ -184,7 +184,7 @@ body{
 /* ══════════════ STORY VIEWER (full screen) ══════════════ */
 #sv{
   position:fixed;inset:0;z-index:8000;background:#000;
-  display:none;flex-direction:column;
+  display:none;flex-direction:column;overflow:hidden;
   touch-action:pan-y;
 }
 #sv.open{display:flex}
@@ -207,6 +207,47 @@ body{
 }
 .sv-tap-l,.sv-tap-r{position:absolute;top:0;bottom:0;width:40%;cursor:pointer;z-index:1}
 .sv-tap-l{left:0}.sv-tap-r{right:0}
+#sv-img{transition:opacity .28s ease}
+#sv-img.sv-fade{opacity:0}
+
+/* ── Reaction bar ── */
+.sv-react-bar{
+  position:absolute;bottom:0;left:0;right:0;z-index:4;
+  padding:10px 0 32px;
+  display:flex;justify-content:center;gap:10px;
+  background:linear-gradient(transparent,rgba(0,0,0,.65));
+  pointer-events:all;
+}
+.sv-rb{
+  font-size:1.6rem;
+  background:rgba(255,255,255,.12);
+  border:1.5px solid rgba(255,255,255,.22);
+  border-radius:50%;width:52px;height:52px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s,background .15s,border-color .15s;
+  flex-direction:column;position:relative;
+}
+.sv-rb:active{transform:scale(1.3)}
+.sv-rb.picked{
+  background:rgba(255,255,255,.28);
+  border-color:rgba(255,255,255,.6);
+  transform:scale(1.15);
+}
+.sv-rb-cnt{
+  font-size:.52rem;color:rgba(255,255,255,.85);
+  line-height:1;margin-top:1px;font-family:sans-serif;
+}
+/* floating emoji animation */
+@keyframes floatUp{
+  0%  {transform:translateY(0) scale(1);opacity:1}
+  70% {transform:translateY(-140px) scale(1.5);opacity:.9}
+  100%{transform:translateY(-210px) scale(.7);opacity:0}
+}
+.sv-floater{
+  position:fixed;font-size:2.6rem;
+  pointer-events:none;z-index:9999;
+  animation:floatUp 1.3s cubic-bezier(.22,.68,0,1.2) forwards;
+}
 
 /* ══════════════ SECTION 3: HERO FEATURED PHOTO ══════════════ */
 .hero-section{
@@ -512,8 +553,8 @@ body{
 <div id="intro" onclick="skipIntro()">
   <div class="i-bar top"></div>
   <div class="i-mid">
-    <div class="i-mid-top">✦ ວັນພິເສດ · August 18 ✦</div>
-    <div class="i-mid-name">CHI ❤️</div>
+    <div class="i-mid-top">✦ August 18 ✦</div>
+    <div class="i-mid-name">stinky ❤️</div>
     <div class="i-mid-sub">Happy Birthday</div>
     <div style="margin-top:30px;font-size:.7rem;color:rgba(255,255,255,.3);letter-spacing:.2em">TAP TO SKIP</div>
   </div>
@@ -560,10 +601,10 @@ body{
   <!-- S1: ENTRANCE -->
   <section class="entrance">
     <div class="entrance-content">
-      <div class="water-label">✦ ວັນພິເສດ · Special Day ✦</div>
+      <div class="water-label">✦  Special Day ✦</div>
       <div class="main-title">Happy Birthday</div>
-      <div class="name-title">CHI ❤️</div>
-      <div class="date-badge">18 ສິງຫາ · August 18</div>
+      <div class="name-title">stinky ❤️</div>
+      <div class="date-badge"> August 18</div>
       <div class="countdown" id="countdown">
         <div class="cd-unit"><span id="cd-d">—</span><p>ມື້</p></div>
         <div class="cd-unit"><span id="cd-h">—</span><p>ຊົ່ວໂມງ</p></div>
@@ -574,40 +615,17 @@ body{
     <div class="scroll-hint"><span>ເລື່ອນລົງ</span><span style="font-size:1.35rem;line-height:1">↓</span></div>
   </section>
 
-  <!-- S2: STORY RINGS -->
+  <!-- S2: STORY RINGS (dynamic from Supabase) -->
   <section class="story-section">
     <div class="story-sec-title">✦ ເລື່ອງຂອງເຮົາ · Our Story ✦</div>
-    <div class="story-scroll">
-      <div class="s-ring-wrap" onclick="openStory(0)">
-        <div class="s-ring"><img src="1.png" alt="story 1"></div>
-        <div class="s-ring-lbl">ວັນທໍາອິດ</div>
-      </div>
-      <div class="s-ring-wrap" onclick="openStory(1)">
-        <div class="s-ring"><img src="2.png" alt="story 2"></div>
-        <div class="s-ring-lbl">ຮ່ວມກັນ</div>
-      </div>
-      <div class="s-ring-wrap" onclick="openStory(2)">
-        <div class="s-ring"><img src="3.png" alt="story 3"></div>
-        <div class="s-ring-lbl">ຄວາມສຸກ</div>
-      </div>
-      <div class="s-ring-wrap" onclick="openStory(3)">
-        <div class="s-ring"><img src="4.png" alt="story 4"></div>
-        <div class="s-ring-lbl">ລູ້ຟ້າ</div>
-      </div>
-      <div class="s-ring-wrap" onclick="openStory(4)">
-        <div class="s-ring"><img src="5.png" alt="story 5"></div>
-        <div class="s-ring-lbl">ຮັກແທ້</div>
-      </div>
-      <div class="s-ring-wrap" onclick="openStory(5)">
-        <div class="s-ring"><img src="6.png" alt="story 6"></div>
-        <div class="s-ring-lbl">ຕະຫຼອດໄປ</div>
-      </div>
+    <div class="story-scroll" id="story-rings">
+      <div style="color:rgba(201,168,76,.5);font-size:.8rem;padding:20px">⭐ ກຳລັງໂຫຼດ...</div>
     </div>
   </section>
 
   <!-- S3: HERO FEATURED PHOTO -->
   <section class="hero-section">
-    <div class="hero-badge">✦ ຮູບທີ່ດີທີ່ສຸດ · Featured Memory ✦</div>
+    <div class="hero-badge">✦Featured Memory ✦</div>
     <div class="hero-wrap">
       <div class="hero-frame" onclick="openLB('1.png')">
         <img src="1.png" alt="Featured">
@@ -662,9 +680,9 @@ body{
   <!-- S6: CELEBRATION -->
   <section class="celebrate-section" id="celebrate-section">
     <span class="big-cake">🎂</span>
-    <div class="cel-title">ສຸຂສັນວັນເກີດ</div>
+    <div class="cel-title">Happy Birthday my lover</div>
     <div class="cel-name">CHI ❤️</div>
-    <div class="cel-date">✦ 18 ສິງຫາ · August 18 ✦</div>
+    <div class="cel-date">✦ August 18 ✦</div>
     <div class="btn-row">
       <button class="cel-btn" onclick="launchConfetti()">🎉 ສ້ອຍຈຸດ!</button>
       <a class="wa-btn" id="wa-link" href="#" target="_blank" rel="noopener">
@@ -687,6 +705,15 @@ body{
   </div>
   <div class="sv-body"><img id="sv-img" src="" alt="Story"></div>
   <div class="sv-foot"><div class="sv-lbl" id="sv-lbl"></div></div>
+  <!-- Reaction bar -->
+  <div class="sv-react-bar" id="sv-react-bar">
+    <button class="sv-rb" onclick="reactStory('❤️')" data-e="❤️"><span>❤️</span><span class="sv-rb-cnt" id="rc-0"></span></button>
+    <button class="sv-rb" onclick="reactStory('😍')" data-e="😍"><span>😍</span><span class="sv-rb-cnt" id="rc-1"></span></button>
+    <button class="sv-rb" onclick="reactStory('🥰')" data-e="🥰"><span>🥰</span><span class="sv-rb-cnt" id="rc-2"></span></button>
+    <button class="sv-rb" onclick="reactStory('🔥')" data-e="🔥"><span>🔥</span><span class="sv-rb-cnt" id="rc-3"></span></button>
+    <button class="sv-rb" onclick="reactStory('😢')" data-e="😢"><span>😢</span><span class="sv-rb-cnt" id="rc-4"></span></button>
+    <button class="sv-rb" onclick="reactStory('💕')" data-e="💕"><span>💕</span><span class="sv-rb-cnt" id="rc-5"></span></button>
+  </div>
   <div class="sv-tap-l" onclick="prevStory()"></div>
   <div class="sv-tap-r" onclick="nextStory()"></div>
 </div>
@@ -712,7 +739,7 @@ body{
    ★  CONFIG  ★  — ແກ້ໄຂ 1 ບ່ອນ
 ════════════════════════════════════════ */
 const CFG = {
-    WHATSAPP_NUM: '+8562077481570',   // ເບີ CHI
+    WHATSAPP_NUM: '+8562057022972',   // ເບີ CHI
     BD_MONTH: 8,  // August
     BD_DAY:   18,
 };
@@ -1060,24 +1087,51 @@ function drawCursor(){
 drawCursor();
 
 /* ════════════════════════════════════════
-   STORY VIEWER
+   STORY VIEWER (dynamic from Supabase)
 ════════════════════════════════════════ */
-const STORIES=[
-    {src:'1.png',lbl:'The First Day'},
-    {src:'2.png',lbl:' Together'},
-    {src:'3.png',lbl:' Happiness'},
-    {src:'4.png',lbl:' Floating Sky'},
-    {src:'5.png',lbl:' True Love'},
-    {src:'6.png',lbl:' Forever'},
-];
+/* Story state */
+let STORIES=[];
 let stIdx=0, stTimer=null;
 const svEl=document.getElementById('sv');
 const svImg=document.getElementById('sv-img');
 const svLbl=document.getElementById('sv-lbl');
 const svBarsEl=document.getElementById('sv-bars');
 
-// Build progress bars
-svBarsEl.innerHTML=STORIES.map(()=>'<div class="sv-bar"><div class="sv-bar-fill"></div></div>').join('');
+/* ── Reactions (localStorage) ── */
+const REACT_EMOJIS=['❤️','😍','🥰','🔥','😢','💕'];
+let stReacts={};
+try{ stReacts=JSON.parse(localStorage.getItem('st-reacts')||'{}'); }catch(e){}
+
+function saveReacts(){ try{ localStorage.setItem('st-reacts',JSON.stringify(stReacts)); }catch(e){} }
+
+function reactStory(emoji){
+    const key=stIdx+'_'+emoji;
+    stReacts[key]=(stReacts[key]||0)+1;
+    saveReacts();
+    updateReactBar();
+    // Float emoji up
+    const floater=document.createElement('div');
+    floater.className='sv-floater';
+    floater.textContent=emoji;
+    floater.style.cssText=`left:${window.innerWidth/2-20}px;bottom:160px`;
+    document.body.appendChild(floater);
+    setTimeout(()=>floater.remove(),1400);
+}
+
+function updateReactBar(){
+    REACT_EMOJIS.forEach((e,i)=>{
+        const cnt=stReacts[stIdx+'_'+e]||0;
+        const cntEl=document.getElementById('rc-'+i);
+        const btn=document.querySelector(`.sv-rb[data-e="${e}"]`);
+        if(cntEl) cntEl.textContent=cnt>0?cnt:'';
+        if(btn) btn.classList.toggle('picked',cnt>0);
+    });
+}
+
+/* ── Story rendering ── */
+function buildBars(){
+    svBarsEl.innerHTML=STORIES.map(()=>'<div class="sv-bar"><div class="sv-bar-fill"></div></div>').join('');
+}
 
 function openStory(i){
     stIdx=i; svEl.classList.add('open');
@@ -1088,13 +1142,24 @@ function closeStory(){
     svEl.querySelectorAll('.sv-bar-fill').forEach(f=>{ f.style.transition='none'; f.style.width='0'; });
 }
 function renderStory(){
+    if(!STORIES.length) return;
     clearTimeout(stTimer);
     const d=STORIES[stIdx];
-    svImg.src=d.src; svLbl.textContent=d.lbl;
+    // Fade transition
+    svImg.classList.add('sv-fade');
+    setTimeout(()=>{
+        svImg.src=d.src; svLbl.textContent=d.lbl||'';
+        svImg.onload=()=>svImg.classList.remove('sv-fade');
+        svImg.onerror=()=>svImg.classList.remove('sv-fade');
+    },200);
+    updateReactBar();
     const fills=svEl.querySelectorAll('.sv-bar-fill');
     fills.forEach((f,i)=>{ f.style.transition='none'; f.style.width=i<stIdx?'100%':'0%'; });
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
-        fills[stIdx].style.transition='width 5s linear'; fills[stIdx].style.width='100%';
+        if(fills[stIdx]){
+            fills[stIdx].style.transition='width 5s linear';
+            fills[stIdx].style.width='100%';
+        }
     }));
     stTimer=setTimeout(()=>{
         if(stIdx<STORIES.length-1){ stIdx++; renderStory(); }else closeStory();
@@ -1103,8 +1168,32 @@ function renderStory(){
 function prevStory(){ if(stIdx>0){ stIdx--; renderStory(); } }
 function nextStory(){ if(stIdx<STORIES.length-1){ stIdx++; renderStory(); }else closeStory(); }
 
-// Close on Escape
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeStory(); closeLB(); } });
+
+/* ── Load stories from Supabase ── */
+async function initStories(){
+    const ringsEl=document.getElementById('story-rings');
+    try{
+        const {data,error}=await sbClient.from('photos').select('*').order('created_at',{ascending:true});
+        if(error||!data||!data.length) throw new Error('no data');
+        STORIES=data.map(p=>({src:p.image_url||'',lbl:p.caption||''}));
+    }catch(e){
+        STORIES=[
+            {src:'1.png',lbl:'ວັນທໍາອິດ'},{src:'2.png',lbl:'ຮ່ວມກັນ'},
+            {src:'3.png',lbl:'ຄວາມສຸກ'},{src:'4.png',lbl:'ລູ້ຟ້າ'},
+            {src:'5.png',lbl:'ຮັກແທ້'},{src:'6.png',lbl:'ຕະຫຼອດໄປ'},
+        ];
+    }
+    // Build rings
+    if(ringsEl){
+        ringsEl.innerHTML=STORIES.map((s,i)=>`
+            <div class="s-ring-wrap" onclick="openStory(${i})">
+                <div class="s-ring"><img src="${s.src}" alt="${s.lbl}" loading="lazy" onerror="this.src='1.png'"></div>
+                <div class="s-ring-lbl">${s.lbl||''}</div>
+            </div>`).join('');
+    }
+    buildBars();
+}
 
 /* ════════════════════════════════════════
    LIGHTBOX
@@ -1163,6 +1252,7 @@ revealObs(document.getElementById('letter-card'),0);
 const SB_URL='https://fxhmjhwhpbvtflrhsofq.supabase.co';
 const SB_KEY='sb_publishable_sEN55L7TBNlWnsXd3_cnfg_6t3_p0w9';
 const sbClient=window.supabase.createClient(SB_URL,SB_KEY);
+initStories();
 
 const SF_CLS=['sf1','sf2','sf3','sf4','sf5','sf6','sf7','sf8','sf9','sf10','sf11','sf12','sf13'];
 const ROMANS=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'];
