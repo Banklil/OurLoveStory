@@ -1,0 +1,12 @@
+{
+  "name": "ourlovestory",
+  "version": "1.0.0",
+  "description": "Birthday & Valentine site for CHI",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
