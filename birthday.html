@@ -1342,10 +1342,34 @@ function updateReactBar(){
    key = ຄຳບັນຍາຍຮູບ (caption) ທີ່ຢູ່ໃນ Supabase
    ໃສ່ຕາມນີ້:  'caption': { q:'ຄຳຖາມ?', a:'ຄຳຕອບ 1', b:'ຄຳຕອບ 2' },
 ════════════════════════════════════════ */
+/* key = ລຳດັບຮູບ (0–24 ຕາມ Supabase). ຕື່ມ q/a/b ໃສ່ໜ້າໃດກໍ່ໄດ້.
+   ຊ່ອງໃດ q ວ່າງ = ໜ້ານັ້ນຈະບໍ່ມີ sticker ຄຳຖາມ. */
 const STORY_QUESTIONS = {
-    'sunrise': { q:'DO YOU ENJOY COOKING?', a:'yessss 🍳', b:"nah let's go out instead" },
-    // 'a mind'  : { q:'ARE YOU A CAT OR A DOG PERSON?', a:'cat person 🐱', b:'dog person 🐶' },
-    // ເພີ່ມໄດ້ເລື້ອຍໆ...
+    0 : { q:'', a:'', b:'' },   // sunrise
+    1 : { q:'', a:'', b:'' },   // a mind
+    2 : { q:'', a:'', b:'' },   // Prince
+    3 : { q:'', a:'', b:'' },   // Bears
+    4 : { q:'', a:'', b:'' },   // The warmth of the sun...
+    5 : { q:'', a:'', b:'' },   // Wonder women
+    6 : { q:'', a:'', b:'' },   // Txxn jc
+    7 : { q:'', a:'', b:'' },   // Moum kharng suay markkk
+    8 : { q:'', a:'', b:'' },   // 🌅
+    9 : { q:'', a:'', b:'' },   // I'm running some flowers over to her.
+    10: { q:'', a:'', b:'' },   // 💐
+    11: { q:'', a:'', b:'' },   // Our first dinner date
+    12: { q:'', a:'', b:'' },   // Tuiii
+    13: { q:'', a:'', b:'' },   // LNY 14/04/2026
+    14: { q:'', a:'', b:'' },   // Suay maiyyyyy
+    15: { q:'', a:'', b:'' },   // Mou
+    16: { q:'', a:'', b:'' },   // Khao bout
+    17: { q:'', a:'', b:'' },   // Bankhot
+    18: { q:'', a:'', b:'' },   // 🍽️😋
+    19: { q:'', a:'', b:'' },   // Suea khu
+    20: { q:'', a:'', b:'' },   // Anniversary 2
+    21: { q:'', a:'', b:'' },   // "~"
+    22: { q:'', a:'', b:'' },   // Si nar phu t dai pen t 1 nai jai khoii
+    23: { q:'', a:'', b:'' },   // Mod
+    24: { q:'', a:'', b:'' },   // To mouuu
 };
 let stAnswers={};
 try{ stAnswers=JSON.parse(localStorage.getItem('st-answers')||'{}'); }catch(e){}
@@ -1354,16 +1378,17 @@ const svQz =document.getElementById('sv-qz');
 const svQzQ=document.getElementById('sv-qz-q');
 const svQzA=document.getElementById('sv-qz-a');
 const svQzB=document.getElementById('sv-qz-b');
-let curQ=null;
+let curQ=null, curGi=null;
 
-function showQuestion(lbl){
-    const q = STORY_QUESTIONS[lbl];
-    curQ = q || null;
-    if(!q){ svQz.classList.remove('show'); return; }
+function showQuestion(gi){
+    const q = STORY_QUESTIONS[gi];
+    // ບໍ່ມີ q ຫຼື q ຍັງວ່າງ → ບໍ່ສະແດງ sticker
+    if(!q || !q.q){ curQ=null; svQz.classList.remove('show'); return; }
+    curQ=q; curGi=gi;
     svQzQ.textContent=q.q;
     svQzA.textContent=q.a;
     svQzB.textContent=q.b;
-    const picked = stAnswers[q.q];   // 0, 1, ຫຼື undefined
+    const picked = stAnswers[gi];   // 0, 1, ຫຼື undefined
     svQzA.classList.toggle('picked', picked===0);
     svQzB.classList.toggle('picked', picked===1);
     svQz.classList.remove('show'); void svQz.offsetWidth; svQz.classList.add('show');
@@ -1371,7 +1396,7 @@ function showQuestion(lbl){
 
 function answerQ(i){
     if(!curQ) return;
-    stAnswers[curQ.q]=i;
+    stAnswers[curGi]=i;
     try{ localStorage.setItem('st-answers',JSON.stringify(stAnswers)); }catch(e){}
     svQzA.classList.toggle('picked', i===0);
     svQzB.classList.toggle('picked', i===1);
@@ -1402,14 +1427,15 @@ function renderStory(){
     const d=STORIES[stIdx];
     svQz.classList.remove('show');   // ເຊື່ອງ sticker ເກົ່າໄວ້ກ່ອນ
     // slides ທີ່ມີຄຳຖາມ ໃຫ້ເວລາຫຼາຍກວ່າ
-    const dur = STORY_QUESTIONS[d.lbl] ? 9000 : 5000;
+    const hasQ = STORY_QUESTIONS[d.gi] && STORY_QUESTIONS[d.gi].q;
+    const dur = hasQ ? 9000 : 5000;
     // Fade transition
     svImg.classList.add('sv-fade');
     setTimeout(()=>{
         svImg.src=d.src; svLbl.textContent=d.lbl||'';
         svImg.onload=()=>svImg.classList.remove('sv-fade');
         svImg.onerror=()=>svImg.classList.remove('sv-fade');
-        showQuestion(d.lbl);
+        showQuestion(d.gi);
     },200);
     updateReactBar();
     const fills=svEl.querySelectorAll('.sv-bar-fill');
@@ -1449,13 +1475,13 @@ async function initStories(){
     try{
         const {data,error}=await sbClient.from('photos').select('*').order('created_at',{ascending:true});
         if(error||!data||!data.length) throw new Error('no data');
-        allPhotos=data.map(p=>({src:p.image_url||'',lbl:p.caption||''}));
+        allPhotos=data.map((p,i)=>({src:p.image_url||'',lbl:p.caption||'',gi:i}));
     }catch(e){
         allPhotos=[
             {src:'1.png',lbl:'ວັນທໍາອິດ'},{src:'2.png',lbl:'ຮ່ວມກັນ'},
             {src:'3.png',lbl:'ຄວາມສຸກ'},{src:'4.png',lbl:'ລູ້ຟ້າ'},
             {src:'5.png',lbl:'ຮັກແທ້'},{src:'6.png',lbl:'ຕະຫຼອດໄປ'},
-        ];
+        ].map((p,i)=>({...p,gi:i}));
     }
     // Split all photos evenly into 5 groups
     const total=allPhotos.length;
