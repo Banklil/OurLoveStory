@@ -260,25 +260,26 @@ body{
   width:32px;height:32px;color:var(--paper);font-size:1rem;cursor:pointer;
   display:flex;align-items:center;justify-content:center;z-index:3;
 }
-.sv-body{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-.sv-body img{max-width:100%;max-height:100vh;object-fit:contain;display:block}
-.sv-foot{padding:14px 20px 34px;text-align:center;position:relative;z-index:2}
+.sv-body{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.sv-body img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.sv-foot{padding:10px 20px 4px;text-align:center;position:relative;z-index:5}
 .sv-lbl{
   font-family:'Caveat','Noto Serif Lao',cursive;font-weight:600;
   font-size:1.5rem;color:var(--paper);
   text-shadow:0 2px 14px rgba(0,0,0,.8);
 }
-.sv-tap-l,.sv-tap-r{position:absolute;top:0;bottom:0;width:40%;cursor:pointer;z-index:1}
+.sv-tap-l,.sv-tap-r{position:absolute;top:56px;bottom:132px;width:40%;cursor:pointer;z-index:1}
 .sv-tap-l{left:0}.sv-tap-r{right:0}
 #sv-img{transition:opacity .28s ease}
 #sv-img.sv-fade{opacity:0}
 
 /* ── Reaction bar ── */
+/* ── in-flow so it sits UNDER the photo, never covering it ── */
 .sv-react-bar{
-  position:absolute;bottom:0;left:0;right:0;z-index:4;
-  padding:10px 0 32px;
-  display:flex;justify-content:center;gap:10px;
-  background:linear-gradient(transparent,rgba(26,5,9,.88));
+  position:relative;z-index:5;
+  padding:8px 0 26px;
+  display:flex;justify-content:center;gap:9px;flex-wrap:nowrap;
+  background:#1a0509;
   pointer-events:all;
 }
 .sv-rb{
@@ -311,6 +312,35 @@ body{
   pointer-events:none;z-index:9999;
   animation:floatUp 1.3s cubic-bezier(.22,.68,0,1.2) forwards;
 }
+
+/* ── IG-style question / poll sticker ── */
+.sv-qz{
+  position:absolute;left:50%;top:24%;transform:translateX(-50%);
+  width:min(310px,84%);z-index:6;
+  display:none;flex-direction:column;
+  border-radius:20px;overflow:hidden;
+  box-shadow:0 14px 44px rgba(0,0,0,.55);
+  pointer-events:auto;
+}
+.sv-qz.show{display:flex;animation:qzPop .42s cubic-bezier(.34,1.56,.64,1)}
+@keyframes qzPop{0%{transform:translateX(-50%) scale(.7);opacity:0}100%{transform:translateX(-50%) scale(1);opacity:1}}
+.sv-qz-q{
+  background:#2b2b2b;color:#fff;font-weight:700;
+  text-transform:uppercase;letter-spacing:.02em;
+  font-family:'Gochi Hand','Noto Sans Lao',sans-serif;
+  font-size:1.08rem;text-align:center;padding:15px 16px;line-height:1.28;
+}
+.sv-qz-opts{background:#efe9df;padding:12px;display:flex;flex-direction:column;gap:10px}
+.sv-qz-opt{
+  background:#fff;border:none;border-radius:13px;
+  padding:13px 16px;text-align:left;font-size:1rem;color:#2b2b2b;
+  cursor:pointer;
+  font-family:'Patrick Hand','Noto Sans Lao',sans-serif;
+  box-shadow:0 2px 6px rgba(0,0,0,.09);
+  transition:transform .12s,background .2s,color .2s;
+}
+.sv-qz-opt:active{transform:scale(.97)}
+.sv-qz-opt.picked{background:var(--maroon);color:#fff;font-weight:700;box-shadow:0 3px 10px rgba(122,18,32,.4)}
 
 /* ══════════════ SECTION 3: HERO PHOTO (scalloped paper) ══════════════ */
 .hero-section{
@@ -872,7 +902,17 @@ body{
     <div class="sv-bars" id="sv-bars"></div>
     <button class="sv-close" onclick="closeStory()">✕</button>
   </div>
-  <div class="sv-body"><img id="sv-img" src="" alt="Story"></div>
+  <div class="sv-body">
+    <img id="sv-img" src="" alt="Story">
+    <!-- IG-style question sticker -->
+    <div class="sv-qz" id="sv-qz">
+      <div class="sv-qz-q" id="sv-qz-q"></div>
+      <div class="sv-qz-opts">
+        <button class="sv-qz-opt" id="sv-qz-a" onclick="answerQ(0)"></button>
+        <button class="sv-qz-opt" id="sv-qz-b" onclick="answerQ(1)"></button>
+      </div>
+    </div>
+  </div>
   <div class="sv-foot"><div class="sv-lbl" id="sv-lbl"></div></div>
   <!-- Reaction bar -->
   <div class="sv-react-bar" id="sv-react-bar">
@@ -1297,6 +1337,51 @@ function updateReactBar(){
     });
 }
 
+/* ════════════════════════════════════════
+   ★ ຄຳຖາມ-ຄຳຕອບ ແບບ IG (ຂຽນເອງ) ★
+   key = ຄຳບັນຍາຍຮູບ (caption) ທີ່ຢູ່ໃນ Supabase
+   ໃສ່ຕາມນີ້:  'caption': { q:'ຄຳຖາມ?', a:'ຄຳຕອບ 1', b:'ຄຳຕອບ 2' },
+════════════════════════════════════════ */
+const STORY_QUESTIONS = {
+    'sunrise': { q:'DO YOU ENJOY COOKING?', a:'yessss 🍳', b:"nah let's go out instead" },
+    // 'a mind'  : { q:'ARE YOU A CAT OR A DOG PERSON?', a:'cat person 🐱', b:'dog person 🐶' },
+    // ເພີ່ມໄດ້ເລື້ອຍໆ...
+};
+let stAnswers={};
+try{ stAnswers=JSON.parse(localStorage.getItem('st-answers')||'{}'); }catch(e){}
+
+const svQz =document.getElementById('sv-qz');
+const svQzQ=document.getElementById('sv-qz-q');
+const svQzA=document.getElementById('sv-qz-a');
+const svQzB=document.getElementById('sv-qz-b');
+let curQ=null;
+
+function showQuestion(lbl){
+    const q = STORY_QUESTIONS[lbl];
+    curQ = q || null;
+    if(!q){ svQz.classList.remove('show'); return; }
+    svQzQ.textContent=q.q;
+    svQzA.textContent=q.a;
+    svQzB.textContent=q.b;
+    const picked = stAnswers[q.q];   // 0, 1, ຫຼື undefined
+    svQzA.classList.toggle('picked', picked===0);
+    svQzB.classList.toggle('picked', picked===1);
+    svQz.classList.remove('show'); void svQz.offsetWidth; svQz.classList.add('show');
+}
+
+function answerQ(i){
+    if(!curQ) return;
+    stAnswers[curQ.q]=i;
+    try{ localStorage.setItem('st-answers',JSON.stringify(stAnswers)); }catch(e){}
+    svQzA.classList.toggle('picked', i===0);
+    svQzB.classList.toggle('picked', i===1);
+    // ໃຫ້ເວລາເບິ່ງຄຳຕອບກ່ອນປ່ຽນຮູບ
+    clearTimeout(stTimer);
+    stTimer=setTimeout(()=>{
+        if(stIdx<STORIES.length-1){ stIdx++; renderStory(); }else closeStory();
+    },2800);
+}
+
 /* ── Story rendering ── */
 function buildBars(){
     svBarsEl.innerHTML=STORIES.map(()=>'<div class="sv-bar"><div class="sv-bar-fill"></div></div>').join('');
@@ -1308,31 +1393,36 @@ function openStory(i){
 }
 function closeStory(){
     svEl.classList.remove('open'); clearTimeout(stTimer);
+    svQz.classList.remove('show');
     svEl.querySelectorAll('.sv-bar-fill').forEach(f=>{ f.style.transition='none'; f.style.width='0'; });
 }
 function renderStory(){
     if(!STORIES.length) return;
     clearTimeout(stTimer);
     const d=STORIES[stIdx];
+    svQz.classList.remove('show');   // ເຊື່ອງ sticker ເກົ່າໄວ້ກ່ອນ
+    // slides ທີ່ມີຄຳຖາມ ໃຫ້ເວລາຫຼາຍກວ່າ
+    const dur = STORY_QUESTIONS[d.lbl] ? 9000 : 5000;
     // Fade transition
     svImg.classList.add('sv-fade');
     setTimeout(()=>{
         svImg.src=d.src; svLbl.textContent=d.lbl||'';
         svImg.onload=()=>svImg.classList.remove('sv-fade');
         svImg.onerror=()=>svImg.classList.remove('sv-fade');
+        showQuestion(d.lbl);
     },200);
     updateReactBar();
     const fills=svEl.querySelectorAll('.sv-bar-fill');
     fills.forEach((f,i)=>{ f.style.transition='none'; f.style.width=i<stIdx?'100%':'0%'; });
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
         if(fills[stIdx]){
-            fills[stIdx].style.transition='width 5s linear';
+            fills[stIdx].style.transition='width '+(dur/1000)+'s linear';
             fills[stIdx].style.width='100%';
         }
     }));
     stTimer=setTimeout(()=>{
         if(stIdx<STORIES.length-1){ stIdx++; renderStory(); }else closeStory();
-    },5000);
+    },dur);
 }
 function prevStory(){ if(stIdx>0){ stIdx--; renderStory(); } }
 function nextStory(){ if(stIdx<STORIES.length-1){ stIdx++; renderStory(); }else closeStory(); }
