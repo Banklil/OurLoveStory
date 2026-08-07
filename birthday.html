@@ -333,7 +333,8 @@ body{
 }
 .hero-scallop .sc-stroke{animation:borderPulse 3.5s ease-in-out infinite}
 /* party-hat doodle pinned to the frame corner */
-.hero-hat{position:absolute;top:-34px;left:-18px;width:64px;z-index:4;color:#c9455c}
+/* ໝວກປາຕີ້ວາງເທິງຫົວຄົນໃນຮູບ (ຫົວຢູ່ປະມານ 58% ຈາກຊ້າຍ, ເທິງສຸດ) */
+.hero-hat{position:absolute;top:-30px;left:46%;width:58px;z-index:4;color:#c9455c}
 /* ── paper plaque ── */
 .hero-plaque{
   margin-top:20px;text-align:center;
@@ -650,7 +651,7 @@ body{
   .cd-unit{min-width:60px;padding:9px 11px}
   .cd-unit span{font-size:1.55rem}
   .moon{width:clamp(120px,26vw,180px);height:clamp(120px,26vw,180px)}
-  .hero-hat{width:52px;top:-28px;left:-12px}
+  .hero-hat{width:48px;top:-24px;left:47%}
 }
 </style>
 </head>
@@ -785,11 +786,11 @@ body{
   <section class="hero-section">
     <div class="hero-badge">✦Featured Memory ✦</div>
     <div class="hero-wrap">
-      <svg class="hero-hat dsway" viewBox="0 0 40 50" width="64" height="80"><use href="#dd-hat"/></svg>
-      <svg class="hero-scallop" viewBox="-4 -4 308 388" onclick="openLB('1.png')" role="img" aria-label="Featured memory">
+      <svg class="hero-hat dsway" viewBox="0 0 40 50" width="58" height="72"><use href="#dd-hat"/></svg>
+      <svg class="hero-scallop" viewBox="-4 -4 308 388" onclick="openLB('chi.jpeg')" role="img" aria-label="Featured memory">
         <!-- paper backing shows through if the photo is missing -->
         <rect x="0" y="0" width="300" height="380" fill="#f3efe6" clip-path="url(#scallopClip)"/>
-        <image href="1.png" x="0" y="0" width="300" height="380"
+        <image href="chi.jpeg" x="0" y="0" width="300" height="380"
                preserveAspectRatio="xMidYMid slice" clip-path="url(#scallopClip)"/>
         <use href="#scallopPath" class="sc-stroke" fill="none" stroke="#7a1220" stroke-width="4.5" stroke-linejoin="round"/>
       </svg>
