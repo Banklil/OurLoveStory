@@ -659,6 +659,22 @@ body.can-edit .sv-edit{display:flex}
 .sf12{animation:sf12 7.0s ease-in-out infinite .45s}
 .sf13{animation:sf13 6.6s ease-in-out infinite 1.25s}
 
+/* ── ເພີ່ມ: ແຖວຄຳອະທິບາຍໃນປ້າຍກາດ (.ft ດ້ານເທິງຄືເກົ່າ) ── */
+.fd{
+  margin-top:3px;white-space:pre-wrap;
+  font-family:'Patrick Hand','Noto Sans Lao',sans-serif;
+  font-size:.8rem;line-height:1.55;color:var(--ink-soft);
+}
+body.can-edit .fd{
+  min-height:1.4em;padding:3px 5px;border-radius:5px;cursor:text;
+  outline:1px dashed rgba(122,18,32,.42);
+}
+body.can-edit .fd:empty::before{content:attr(data-ph);opacity:.5}
+body.can-edit .fd:focus{outline:2px solid var(--maroon);background:var(--paper-lt)}
+.fd.fd-busy{opacity:.55}
+.fd.fd-ok{outline:2px solid #3f8f5a !important}
+.fd.fd-err{outline:2px solid #b3341f !important}
+
 /* ══════════════ SECTION 5: LOVE LETTER (paper notebook) ══════════════ */
 .letter-section{
   padding:64px 18px;
@@ -778,7 +794,7 @@ body.can-edit .sv-edit{display:flex}
   z-index:900;opacity:0;pointer-events:none;transition:opacity .3s;
 }
 .lightbox.open{opacity:1;pointer-events:all}
-.lb-inner{position:relative;display:flex;flex-direction:column;align-items:center}
+.lb-inner{position:relative}
 .lb-inner img{
   max-width:92vw;max-height:88vh;object-fit:contain;
   border:7px solid var(--paper);border-radius:4px;
@@ -790,35 +806,6 @@ body.can-edit .sv-edit{display:flex}
   cursor:pointer;opacity:.75;transition:opacity .2s;
 }
 .lb-close:hover{opacity:1}
-
-/* ── ເພີ່ມ: ກ່ອງຄຳອະທິບາຍໃຕ້ຮູບ (ຮູບຍັງເປັນແບບເກົ່າທຸກຢ່າງ) ── */
-.lb-note{
-  width:min(92vw,620px);margin-top:14px;
-  background:var(--paper);border:2px solid var(--maroon);border-radius:12px;
-  box-shadow:4px 5px 0 var(--maroon-dk);
-  padding:14px 16px;max-height:32vh;overflow-y:auto;text-align:left;
-}
-.lb-note.hide{display:none}
-.lb-note-text{
-  white-space:pre-wrap;color:var(--ink);
-  font-family:'Patrick Hand','Noto Sans Lao',sans-serif;
-  font-size:1rem;line-height:1.9;
-}
-.lb-note-edit{display:none;flex-direction:column;gap:9px}
-body.can-edit .lb-note-edit{display:flex}
-body.can-edit .lb-note-text{display:none}
-.lb-note-edit textarea{
-  width:100%;min-height:110px;padding:11px;
-  border:1px solid var(--paper-sh);border-radius:10px;
-  background:var(--paper-lt);color:var(--ink);resize:vertical;
-  font-family:'Patrick Hand','Noto Sans Lao',sans-serif;font-size:1rem;line-height:1.8;
-}
-.lb-note-edit textarea:focus{outline:2px solid var(--maroon-lt);outline-offset:1px}
-.lb-note-row{display:flex;align-items:center;gap:8px}
-.lb-note-status{
-  flex:1;min-width:0;font-family:'Noto Sans Lao',sans-serif;
-  font-size:.72rem;line-height:1.4;color:var(--ink-soft);
-}
 
 /* ══════════════ NAV LINK ══════════════ */
 .nav-link{
@@ -1154,15 +1141,7 @@ body.can-edit .lb-note-text{display:none}
   <div class="lb-inner">
     <button class="lb-close" onclick="closeLB()">✕</button>
     <img id="lb-img" src="" alt="Memory">
-    <div class="lb-note hide" id="lb-note">
-      <div class="lb-note-text" id="lb-note-text"></div>
-      <div class="lb-note-edit">
-        <textarea id="lb-note-input" maxlength="1200"
-                  placeholder="ພິມຄຳອະທິບາຍຂອງຮູບນີ້…"></textarea>
-        <div class="lb-note-row">
-          <span class="lb-note-status" id="lb-note-status"></span>
-          <button class="cap-ed-btn" id="lb-note-save" onclick="saveNote()">ບັນທຶກ</button>
-        </div>
+  </div>
       </div>
     </div>
   </div>
@@ -1866,68 +1845,46 @@ async function initStories(){
 ════════════════════════════════════════ */
 const lbEl=document.getElementById('lightbox');
 const lbImg=document.getElementById('lb-img');
-let lbPhoto = null;
-
-/* ຄຳອະທິບາຍເກັບຢູ່ຄໍລຳ note ຖ້າມີ ຖ້າຍັງບໍ່ມີກໍໃຊ້ caption ໄປກ່ອນ.
-   ຕາຕະລາງດຽວນີ້ມີແຕ່ caption — ພໍເພີ່ມຄໍລຳ note ໃນ Supabase
-   ໜ້ານີ້ຈະຫັນໄປໃຊ້ note ເອງ ໂດຍບໍ່ຕ້ອງແກ້ໂຄດ. */
+/* ຄຳອະທິບາຍເກັບຢູ່ຄໍລຳ note. ຕາຕະລາງດຽວນີ້ຍັງບໍ່ມີ note —
+   ເພີ່ມໃນ Supabase ແລ້ວໜ້ານີ້ຈະໃຊ້ເອງ ໂດຍບໍ່ຕ້ອງແກ້ໂຄດ.
+   ບໍ່ຕົກມາຂຽນທັບ caption ເດັດຂາດ: caption ແມ່ນຄຳທີ່ມາຕອນອັບໂຫລດ. */
 function noteOf(photo){
     if(!photo) return '';
-    return (photo.note !== undefined && photo.note !== null) ? photo.note : (photo.caption || '');
+    return (photo.note !== undefined && photo.note !== null) ? photo.note : '';
 }
 
-function openLB(src, photo){
-    lbPhoto = photo || null;
-    lbImg.src = src;
-
-    const txt = noteOf(photo);
-    const view = document.getElementById('lb-note-text');
-    const inp  = document.getElementById('lb-note-input');
-    const st   = document.getElementById('lb-note-status');
-    const sv   = document.getElementById('lb-note-save');
-    if(view) view.textContent = txt;
-
-    /* ບໍ່ມີຄຳອະທິບາຍ ແລະ ບໍ່ໄດ້ຢູ່ໂໝດແກ້ໄຂ → ເຊື່ອງກ່ອງໄປເລີຍ
-       ຮູບຈຶ່ງເປັນແບບເກົ່າທຸກຢ່າງ */
-    const box = document.getElementById('lb-note');
-    if(box) box.classList.toggle('hide', !txt && !CAN_EDIT);
-
-    if(inp){
-        inp.value = txt;
-        const ok = !!(photo && photo.id);
-        sv.disabled = !ok;
-        st.textContent = ok ? '' : 'ຮູບນີ້ບໍ່ໄດ້ມາຈາກ Supabase ຈຶ່ງບັນທຶກບໍ່ໄດ້';
-    }
-    lbEl.classList.add('open');
+function escHtml(t){
+    return String(t).replace(/[&<>"']/g, function(c){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
 }
 
-async function saveNote(){
-    if(!lbPhoto || !lbPhoto.id) return;
-    const inp = document.getElementById('lb-note-input');
-    const st  = document.getElementById('lb-note-status');
-    const sv  = document.getElementById('lb-note-save');
-    const val = inp.value.trim();
+/* ບັນທຶກຄຳອະທິບາຍທີ່ພິມຢູ່ເທິງກາດ gallery */
+async function saveCardNote(el){
+    const id = Number(el.dataset.pid);
+    if(!id) return;
+    const val = el.textContent.trim();
+    if(val === (el.dataset.saved || '')) return;      /* ບໍ່ປ່ຽນ ບໍ່ຕ້ອງຂຽນ */
 
-    sv.disabled = true;
-    st.textContent = 'ກຳລັງບັນທຶກ…';
+    el.classList.remove('fd-ok','fd-err');
+    el.classList.add('fd-busy');
+    const res = await sbClient.from('photos').update({note: val}).eq('id', id);
+    el.classList.remove('fd-busy');
 
-    let col = 'note';
-    let res = await sbClient.from('photos').update({note: val}).eq('id', lbPhoto.id);
-    if(res.error && /column|schema|note/i.test(res.error.message || '')){
-        col = 'caption';
-        res = await sbClient.from('photos').update({caption: val}).eq('id', lbPhoto.id);
-    }
     if(res.error){
-        st.textContent = 'ບັນທຶກບໍ່ໄດ້: ' + (res.error.message || res.error);
-        sv.disabled = false;
+        el.classList.add('fd-err');
+        el.title = /column|schema|note/i.test(res.error.message || '')
+            ? 'ຍັງບໍ່ມີຄໍລຳ note ໃນ Supabase — ແລ່ນ: alter table photos add column note text;'
+            : ('ບັນທຶກບໍ່ໄດ້: ' + res.error.message);
         return;
     }
-    lbPhoto[col] = val;
-    document.getElementById('lb-note-text').textContent = val;
-    document.getElementById('lb-note').classList.toggle('hide', !val && !CAN_EDIT);
-    st.textContent = 'ບັນທຶກແລ້ວ ✓';
-    sv.disabled = false;
+    el.dataset.saved = val;
+    el.title = '';
+    el.classList.add('fd-ok');
+    setTimeout(function(){ el.classList.remove('fd-ok'); }, 1200);
 }
+
+function openLB(src){ lbImg.src=src; lbEl.classList.add('open'); }
 function closeLB(){ lbEl.classList.remove('open'); }
 lbEl.addEventListener('click',e=>{ if(e.target===lbEl) closeLB(); });
 
@@ -2063,20 +2020,40 @@ async function loadSpaceGallery(){
             const inner=document.createElement('div');
             inner.className=`spf ${fc}`;
             const safeUrl=photo.image_url||'';
+            /* ຄຳອະທິບາຍໃໝ່ ເພີ່ມໃສ່ປ້າຍ .fp — .ft (ຄຳຕອນອັບໂຫລດ) ຄືເກົ່າທຸກຢ່າງ */
+            const note=noteOf(photo);
+            const showFd=note||CAN_EDIT;
             inner.innerHTML=`<img src="${safeUrl}" alt="${cap}" loading="lazy" style="width:100%;display:block;object-fit:cover;min-height:80px" onerror="this.classList.add('broken');this.style.minHeight='100px'">`
-                +(cap?`<div class="fp"><div class="ft">${cap}</div><div class="fn">EXHIBIT · ${num}</div></div>`:'');
+                +((cap||showFd)?`<div class="fp">`
+                    +(cap?`<div class="ft">${cap}</div>`:``)
+                    +(showFd?`<div class="fd" data-pid="${photo.id}" data-saved="${escHtml(note)}"`
+                        +(CAN_EDIT?` contenteditable="true" data-ph="ພິມຄຳອະທິບາຍ…"`:``)
+                        +`>${escHtml(note)}</div>`:``)
+                    +`<div class="fn">EXHIBIT · ${num}</div></div>`:'');
             wrap.appendChild(inner);
             gallery.appendChild(wrap);
 
             /* estimate height: image (4:3 ratio) + plate */
-            const estH=Math.round(cardW*(4/3))+(cap?44:0)+14;
+            const estH=Math.round(cardW*(4/3))+(cap?44:0)+(showFd?34:0)+14;
             colH[c]+=estH+gap;
 
             /* fade in */
             setTimeout(()=>wrap.classList.add('vis'), 80+i*90);
 
             /* drag */
-            makeDraggable(wrap, ()=>openLB(photo.image_url, photo));
+            makeDraggable(wrap, ()=>openLB(photo.image_url));
+
+            /* ພິມໃສ່ຄຳອະທິບາຍ ບໍ່ໃຫ້ໄປລາກກາດ ຫຼື ເປີດ lightbox */
+            const fd=inner.querySelector('.fd[contenteditable]');
+            if(fd){
+                ['mousedown','touchstart','click','dblclick'].forEach(function(ev){
+                    fd.addEventListener(ev, function(e){ e.stopPropagation(); });
+                });
+                fd.addEventListener('blur', function(){ saveCardNote(fd); });
+                fd.addEventListener('keydown', function(e){
+                    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); fd.blur(); }
+                });
+            }
         });
 
         /* set container height */
