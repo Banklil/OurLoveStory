@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Songs for you ♡</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Sans+Lao:wght@300;400;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        cream:  { 50:'#fffdf8', 100:'#fdf6ea', 200:'#f7ecd9', 300:'#efdfc6', 400:'#e3cdaa' },
+        rosewd: { 300:'#e8a6b8', 400:'#d98098', 500:'#c25f7c', 600:'#a34760' },
+        ink:    { DEFAULT:'#4a3b33', soft:'#8b7466' },
+      },
+      fontFamily: {
+        hand:    ['Caveat', 'Noto Sans Lao', 'cursive'],
+        display: ['"Cormorant Garamond"', 'Noto Sans Lao', 'serif'],
+        lao:     ['"Noto Sans Lao"', 'sans-serif'],
+      },
+    },
+  },
+};
+</script>
+
+<style>
+  *,*::before,*::after { box-sizing: border-box; }
+  body { -webkit-tap-highlight-color: transparent; }
+
+  /* ── paper grain, shared by the envelope screen and the mixtape ── */
+  .paper-grain {
+    background-image:
+      radial-gradient(circle at 20% 15%, rgba(217,128,152,.06), transparent 45%),
+      radial-gradient(circle at 82% 78%, rgba(194,95,124,.05), transparent 45%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E");
+  }
+
+  /* ── 1. envelope: "tap to open" breathing ── */
+  @keyframes breathe { 0%,100%{ transform:translateY(0) scale(1) } 50%{ transform:translateY(-6px) scale(1.02) } }
+  .animate-breathe { animation: breathe 2.4s ease-in-out infinite; }
+
+  @keyframes pulseHint { 0%,100%{ opacity:.55; transform:translateY(0) } 50%{ opacity:1; transform:translateY(3px) } }
+  .animate-hint { animation: pulseHint 1.8s ease-in-out infinite; }
+
+  @keyframes sealGlow { 0%,100%{ filter:drop-shadow(0 0 6px rgba(194,95,124,.35)) } 50%{ filter:drop-shadow(0 0 18px rgba(194,95,124,.65)) } }
+  .animate-seal { animation: sealGlow 2.8s ease-in-out infinite; }
+
+  /* ── 2. floral burst ── */
+  /* the whole field swells outward; each bloom pops on its own radius delay */
+  @keyframes fieldSwell {
+    0%   { transform: translate(-50%,-50%) scale(.28); }
+    100% { transform: translate(-50%,-50%) scale(1.18); }
+  }
+  .field-swell { animation: fieldSwell 1750ms cubic-bezier(.16,.68,.32,1) forwards; }
+
+  @keyframes bloomIn {
+    0%   { transform: scale(0) rotate(var(--spin-from)); opacity: 0; }
+    62%  { transform: scale(1.14) rotate(0deg);          opacity: 1; }
+    100% { transform: scale(1) rotate(0deg);             opacity: 1; }
+  }
+  .bloom-in { animation: bloomIn 620ms cubic-bezier(.34,1.56,.64,1) both; }
+
+  @keyframes coreFlash {
+    0%   { transform: translate(-50%,-50%) scale(0);  opacity: .9; }
+    70%  { transform: translate(-50%,-50%) scale(2.6); opacity: .55; }
+    100% { transform: translate(-50%,-50%) scale(3.6); opacity: 0; }
+  }
+  .core-flash { animation: coreFlash 1400ms ease-out forwards; }
+
+  /* ── 4. cassette reels ── */
+  @keyframes reelSpin { to { transform: rotate(360deg); } }
+  .reel-spin { animation: reelSpin 2.6s linear infinite; transform-origin: 50% 50%; }
+
+  @keyframes riseIn { from { opacity:0; transform:translateY(26px) } to { opacity:1; transform:translateY(0) } }
+  .rise-in { animation: riseIn 800ms cubic-bezier(.22,.9,.3,1) both; }
+
+  /* range input, themed */
+  input[type=range].scrub { -webkit-appearance:none; appearance:none; background:transparent; }
+  input[type=range].scrub::-webkit-slider-runnable-track { height:4px; border-radius:99px; background:#efdfc6; }
+  input[type=range].scrub::-moz-range-track            { height:4px; border-radius:99px; background:#efdfc6; }
+  input[type=range].scrub::-webkit-slider-thumb {
+    -webkit-appearance:none; width:13px; height:13px; margin-top:-4.5px;
+    border-radius:99px; background:#c25f7c; box-shadow:0 1px 4px rgba(0,0,0,.25); cursor:pointer;
+  }
+  input[type=range].scrub::-moz-range-thumb {
+    width:13px; height:13px; border:0; border-radius:99px; background:#c25f7c; cursor:pointer;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-breathe, .animate-hint, .animate-seal, .reel-spin { animation: none !important; }
+    .field-swell, .bloom-in, .core-flash { animation-duration: 1ms !important; }
+  }
+</style>
+</head>
+
+<body class="bg-cream-100">
+<div id="app"></div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script>
+const { createApp, ref, computed, onMounted, onBeforeUnmount, nextTick } = Vue;
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTENT — everything you'd want to edit lives here
+   ═══════════════════════════════════════════════════════════════ */
+const TRACKS = [
+  { id:1, title:'Those Eyes',  artist:'New West',    src:'New West - Those Eyes (Lyrics).mp3',
+    note:'ເພງທຳອິດ — ເພງທີ່ຂ້ອຍຄິດຮອດເຈົ້າທຸກເທື່ອທີ່ໄດ້ຍິນ' },
+  { id:2, title:'Perfect',     artist:'Ed Sheeran',  src:'tracks/perfect.mp3',
+    note:'ສຳລັບຕອນທີ່ເຮົາເຕັ້ນກັນຢູ່ໃນຄົວ' },
+  { id:3, title:'All of Me',   artist:'John Legend', src:'tracks/all-of-me.mp3',
+    note:'ທຸກສ່ວນຂອງຂ້ອຍ ຮັກທຸກສ່ວນຂອງເຈົ້າ' },
+  { id:4, title:'Yellow',      artist:'Coldplay',    src:'tracks/yellow.mp3',
+    note:'ດາວທຸກດວງ… ມັນສ່ອງແສງເພື່ອເຈົ້າ' },
+];
+
+const LINER_NOTE = {
+  to: 'ເຖິງ CHI',
+  body: [
+    'ຂ້ອຍບໍ່ເກັ່ງເລື່ອງການເວົ້າອອກມາດັງໆ ສະນັ້ນຂ້ອຍຈຶ່ງເຮັດເທບນີ້ໃຫ້ເຈົ້າແທນ.',
+    'ທຸກເພງໃນນີ້ ຂ້ອຍເລືອກມາຍ້ອນມັນເຮັດໃຫ້ຂ້ອຍຄິດຮອດເຈົ້າ — ບາງເພງແມ່ນຕອນທີ່ເຮົາຫົວກັນ, ບາງເພງແມ່ນຕອນທີ່ຂ້ອຍລໍຖ້າເຈົ້າຕອບຂໍ້ຄວາມ.',
+    'ຖ້າມື້ໃດເຈົ້າຮູ້ສຶກເມື່ອຍ ຫຼື ໂດດດ່ຽວ, ກົດຫຼິ້ນເພງເຫຼົ່ານີ້ ແລ້ວຈື່ໄວ້ວ່າມີຄົນໜຶ່ງກຳລັງຄິດຮອດເຈົ້າຢູ່ສະເໝີ.',
+  ],
+  sign: 'ຮັກສະເໝີ,',
+  from: '— ຂ້ອຍເອງ',
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   FlowerSvg — one bloom. Two shapes so the field doesn't look tiled.
+   ═══════════════════════════════════════════════════════════════ */
+const FlowerSvg = {
+  props: { petal:String, heart:String, variant:Number },
+  computed: {
+    angles() { return this.variant === 0 ? [0,60,120,180,240,300] : [0,72,144,216,288]; },
+    ry()     { return this.variant === 0 ? 25 : 22; },
+    rx()     { return this.variant === 0 ? 14 : 17; },
+  },
+  template: `
+    <svg viewBox="0 0 100 100" class="w-full h-full">
+      <g>
+        <ellipse v-for="a in angles" :key="a"
+                 cx="50" :cy="50 - ry * 0.78" :rx="rx" :ry="ry"
+                 :fill="petal" :transform="'rotate(' + a + ' 50 50)'"
+                 fill-opacity=".96" />
+        <circle cx="50" cy="50" :r="variant === 0 ? 11 : 10" :fill="heart" />
+        <circle cx="50" cy="50" :r="variant === 0 ? 6 : 5"  fill="#e8a33d" fill-opacity=".85" />
+      </g>
+    </svg>`,
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   1. EnvelopeGate — sealed envelope + "Tap to open"
+   ═══════════════════════════════════════════════════════════════ */
+const EnvelopeGate = {
+  emits: ['open'],
+  template: `
+    <div class="fixed inset-0 z-40 flex flex-col items-center justify-center
+                bg-cream-100 paper-grain px-6 select-none">
+
+      <button type="button"
+              @click="$emit('open')"
+              aria-label="ເປີດຈົດໝາຍ"
+              class="group relative outline-none focus-visible:ring-4 focus-visible:ring-rosewd-300/50
+                     rounded-3xl transition-transform duration-300 active:scale-95">
+
+        <div class="animate-breathe w-[min(78vw,340px)] drop-shadow-[0_18px_40px_rgba(122,60,80,.22)]">
+          <svg viewBox="0 0 320 220" class="w-full h-auto">
+            <!-- body -->
+            <rect x="8" y="24" width="304" height="184" rx="12"
+                  fill="#fdf6ea" stroke="#d9b9a4" stroke-width="2.5"/>
+            <!-- inner fold lines -->
+            <path d="M8 36 L160 132 L312 36" fill="none" stroke="#e3cdaa" stroke-width="2.5"/>
+            <path d="M8 200 L120 118 M312 200 L200 118" fill="none" stroke="#eddcc6" stroke-width="2"/>
+            <!-- closed flap -->
+            <path d="M8 36 Q8 24 20 24 L300 24 Q312 24 312 36 L160 134 Z"
+                  fill="#f7ecd9" stroke="#d9b9a4" stroke-width="2.5" stroke-linejoin="round"/>
+            <!-- sprig of greenery under the seal -->
+            <path d="M124 118 Q146 108 160 112 M196 118 Q174 108 160 112"
+                  stroke="#9bab86" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <ellipse cx="128" cy="114" rx="9" ry="5" fill="#9bab86" transform="rotate(-24 128 114)"/>
+            <ellipse cx="192" cy="114" rx="9" ry="5" fill="#9bab86" transform="rotate(24 192 114)"/>
+          </svg>
+
+          <!-- floral wax seal, sitting on the flap point -->
+          <div class="animate-seal absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[26%]
+                      w-[26%] aspect-square">
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+              <circle cx="50" cy="50" r="46" fill="#c25f7c"/>
+              <circle cx="50" cy="50" r="46" fill="none" stroke="#a34760" stroke-width="4"/>
+              <circle cx="50" cy="50" r="37" fill="none" stroke="#e8a6b8" stroke-width="1.6" stroke-dasharray="4 5"/>
+              <g opacity=".92">
+                <ellipse v-for="a in [0,72,144,216,288]" :key="a"
+                         cx="50" cy="34" rx="9" ry="14" fill="#fdf6ea"
+                         :transform="'rotate(' + a + ' 50 50)'"/>
+                <circle cx="50" cy="50" r="7" fill="#f7d9a0"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </button>
+
+      <p class="animate-hint mt-10 font-hand text-2xl sm:text-3xl text-rosewd-600 tracking-wide">
+        Tap to open
+      </p>
+      <p class="mt-1 font-lao text-[11px] tracking-[.25em] uppercase text-ink-soft/70">
+        ກົດເພື່ອເປີດ
+      </p>
+    </div>`,
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   2. FloralBurst — the transition layer
+   Pure SVG sprites in polar coordinates. Delay scales with radius,
+   so blooms open from the centre outward. Swap this component's
+   internals for <video> / Lottie later without touching anything else.
+   ═══════════════════════════════════════════════════════════════ */
+const PETALS = ['#ffd7e5','#ffbdd4','#ff9dc0','#f887ae','#fff1f5','#fffdf8','#fce7ef','#f8a8c4'];
+const HEARTS = ['#f7c948','#f7d9a0','#fbe3b8'];
+
+const FloralBurst = {
+  components: { FlowerSvg },
+  props: { fading: Boolean },
+  setup() {
+    const COUNT = 130;
+    const blooms = Array.from({ length: COUNT }, (_, i) => {
+      const angle = Math.random() * Math.PI * 2;
+      // sqrt bias → even area coverage instead of a clumped middle
+      const radius = Math.sqrt(Math.random());
+      const size   = 5 + Math.random() * 11;           // % of the field box
+      return {
+        id: i,
+        left:  50 + Math.cos(angle) * radius * 48,
+        top:   50 + Math.sin(angle) * radius * 48,
+        size,
+        petal: PETALS[(Math.random() * PETALS.length) | 0],
+        heart: HEARTS[(Math.random() * HEARTS.length) | 0],
+        variant: Math.random() < 0.5 ? 0 : 1,
+        spinFrom: (Math.random() * 160 - 80).toFixed(0) + 'deg',
+        // radius drives the delay → the wave travels outward
+        delay: Math.round(radius * 780 + Math.random() * 120),
+        z: (Math.random() * 10) | 0,
+      };
+    });
+    return { blooms };
+  },
+  template: `
+    <div class="fixed inset-0 z-50 overflow-hidden pointer-events-none
+                transition-opacity duration-[900ms] ease-out"
+         :class="fading ? 'opacity-0' : 'opacity-100'"
+         aria-hidden="true">
+
+      <!-- soft warm wash so the flowers read against the page beneath -->
+      <div class="core-flash absolute left-1/2 top-1/2 w-[60vmax] h-[60vmax] rounded-full"
+           style="background: radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(255,214,230,.6) 45%, rgba(255,214,230,0) 72%)"></div>
+
+      <div class="field-swell absolute left-1/2 top-1/2 w-[165vmax] h-[165vmax]">
+        <div v-for="f in blooms" :key="f.id"
+             class="bloom-in absolute"
+             :style="{
+               left: f.left + '%',
+               top: f.top + '%',
+               width: f.size + '%',
+               height: f.size + '%',
+               marginLeft: '-' + (f.size / 2) + '%',
+               marginTop:  '-' + (f.size / 2) + '%',
+               animationDelay: f.delay + 'ms',
+               zIndex: f.z,
+               '--spin-from': f.spinFrom,
+             }">
+          <FlowerSvg :petal="f.petal" :heart="f.heart" :variant="f.variant" />
+        </div>
+      </div>
+    </div>`,
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   4a. CassetteSvg — retro tape, reels spin while playing
+   ═══════════════════════════════════════════════════════════════ */
+const CassetteSvg = {
+  props: { playing: Boolean },
+  template: `
+    <svg viewBox="0 0 240 150" class="w-full h-auto">
+      <rect x="4" y="4" width="232" height="142" rx="12" fill="#f7ecd9" stroke="#c9a58c" stroke-width="3"/>
+      <rect x="18" y="18" width="204" height="66" rx="7" fill="#fffdf8" stroke="#e3cdaa" stroke-width="2"/>
+      <line x1="18" y1="34" x2="222" y2="34" stroke="#f2d9df" stroke-width="2"/>
+      <line x1="18" y1="50" x2="222" y2="50" stroke="#f2d9df" stroke-width="2"/>
+      <line x1="18" y1="66" x2="222" y2="66" stroke="#f2d9df" stroke-width="2"/>
+
+      <rect x="34" y="94" width="172" height="40" rx="6" fill="#efdfc6" stroke="#c9a58c" stroke-width="2"/>
+
+      <g :class="playing ? 'reel-spin' : ''" style="transform-box:fill-box; transform-origin:center">
+        <circle cx="74" cy="114" r="15" fill="#fffdf8" stroke="#a34760" stroke-width="3"/>
+        <g stroke="#c25f7c" stroke-width="3" stroke-linecap="round">
+          <line x1="74" y1="104" x2="74" y2="124"/>
+          <line x1="64" y1="114" x2="84" y2="114"/>
+          <line x1="67" y1="107" x2="81" y2="121"/>
+          <line x1="81" y1="107" x2="67" y2="121"/>
+        </g>
+      </g>
+      <g :class="playing ? 'reel-spin' : ''" style="transform-box:fill-box; transform-origin:center">
+        <circle cx="166" cy="114" r="15" fill="#fffdf8" stroke="#a34760" stroke-width="3"/>
+        <g stroke="#c25f7c" stroke-width="3" stroke-linecap="round">
+          <line x1="166" y1="104" x2="166" y2="124"/>
+          <line x1="156" y1="114" x2="176" y2="114"/>
+          <line x1="159" y1="107" x2="173" y2="121"/>
+          <line x1="173" y1="107" x2="159" y2="121"/>
+        </g>
+      </g>
+
+      <circle cx="120" cy="114" r="4" fill="#c9a58c"/>
+      <rect x="52" y="138" width="12" height="8" rx="2" fill="#c9a58c"/>
+      <rect x="176" y="138" width="12" height="8" rx="2" fill="#c9a58c"/>
+    </svg>`,
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   4b. TrackList
+   ═══════════════════════════════════════════════════════════════ */
+const TrackList = {
+  props: { tracks:Array, currentId:Number, playing:Boolean, unavailable:Array },
+  emits: ['toggle'],
+  methods: {
+    isActive(t)  { return t.id === this.currentId; },
+    isMissing(t) { return this.unavailable.includes(t.id); },
+    pad(i)       { return String(i + 1).padStart(2, '0'); },
+  },
+  template: `
+    <ul class="space-y-3">
+      <li v-for="(t, i) in tracks" :key="t.id">
+        <button type="button"
+                @click="$emit('toggle', t)"
+                :disabled="isMissing(t)"
+                class="w-full flex items-center gap-4 rounded-xl border px-4 py-3.5 text-left
+                       transition-all duration-300 outline-none
+                       focus-visible:ring-2 focus-visible:ring-rosewd-300
+                       disabled:opacity-40 disabled:cursor-not-allowed"
+                :class="isActive(t)
+                  ? 'bg-rosewd-500/8 border-rosewd-400/60 shadow-[0_6px_18px_rgba(194,95,124,.13)]'
+                  : 'bg-cream-50/70 border-cream-300 hover:border-rosewd-300 hover:bg-cream-50'">
+
+          <span class="font-display text-xl tabular-nums w-7 shrink-0"
+                :class="isActive(t) ? 'text-rosewd-500' : 'text-ink-soft/60'">{{ pad(i) }}</span>
+
+          <span class="grid place-items-center w-10 h-10 shrink-0 rounded-full border transition-colors"
+                :class="isActive(t) && playing
+                  ? 'bg-rosewd-500 border-rosewd-500 text-cream-50'
+                  : 'bg-cream-50 border-cream-300 text-rosewd-500'">
+            <svg v-if="isActive(t) && playing" viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
+              <rect x="6" y="4.5" width="4" height="15" rx="1.2"/>
+              <rect x="14" y="4.5" width="4" height="15" rx="1.2"/>
+            </svg>
+            <svg v-else viewBox="0 0 24 24" class="w-4 h-4 translate-x-[1px]" fill="currentColor">
+              <path d="M7 4.8v14.4c0 .8.9 1.3 1.6.9l11-7.2a1 1 0 0 0 0-1.7l-11-7.2A1 1 0 0 0 7 4.8Z"/>
+            </svg>
+          </span>
+
+          <span class="min-w-0 flex-1">
+            <span class="block font-display text-lg leading-tight text-ink truncate">{{ t.title }}</span>
+            <span class="block font-lao text-xs text-ink-soft truncate">{{ t.artist }}</span>
+            <span v-if="isMissing(t)" class="block font-lao text-[10px] text-rosewd-500/80 mt-0.5">
+              ຍັງບໍ່ມີໄຟລ໌ · {{ t.src }}
+            </span>
+          </span>
+
+          <!-- little equaliser for the active track -->
+          <span v-if="isActive(t) && playing" class="flex items-end gap-[3px] h-5 shrink-0">
+            <span v-for="(d, k) in [0, 180, 360]" :key="k"
+                  class="w-[3px] bg-rosewd-400 rounded-full animate-breathe"
+                  :style="{ height: (9 + k * 4) + 'px', animationDelay: d + 'ms', animationDuration: '900ms' }"></span>
+          </span>
+        </button>
+      </li>
+    </ul>`,
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   4c. LinerNote
+   ═══════════════════════════════════════════════════════════════ */
+const LinerNote = {
+  props: { note:Object },
+  template: `
+    <div class="relative h-full rounded-2xl border border-cream-300 bg-cream-50/80 paper-grain
+                p-7 sm:p-9 shadow-[0_10px_34px_rgba(122,60,80,.09)]">
+
+      <!-- washi tape -->
+      <span class="absolute -top-3 left-1/2 -translate-x-1/2 -rotate-2 w-28 h-6 rounded-sm
+                   bg-rosewd-300/35 border-x border-rosewd-300/40"></span>
+
+      <p class="font-lao text-[10px] tracking-[.32em] uppercase text-ink-soft/70">Liner Note</p>
+      <h3 class="mt-2 font-hand text-3xl text-rosewd-600">{{ note.to }}</h3>
+
+      <div class="mt-5 space-y-4">
+        <p v-for="(line, i) in note.body" :key="i"
+           class="font-lao text-[15px] leading-[2] text-ink/90">{{ line }}</p>
+      </div>
+
+      <div class="mt-8 pt-5 border-t border-dashed border-cream-400">
+        <p class="font-lao text-sm text-ink-soft">{{ note.sign }}</p>
+        <p class="font-hand text-3xl text-rosewd-500 mt-1">{{ note.from }}</p>
+      </div>
+    </div>`,
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   4d. MixtapeView — header + two-column layout + transport bar
+   ═══════════════════════════════════════════════════════════════ */
+const MixtapeView = {
+  components: { CassetteSvg, TrackList, LinerNote },
+  props: {
+    tracks:Array, note:Object, currentId:Number, playing:Boolean,
+    unavailable:Array, progress:Number, elapsed:String, duration:String, currentTrack:Object,
+  },
+  emits: ['toggle','seek','prev','next'],
+  template: `
+    <main class="min-h-[100dvh] bg-cream-100 paper-grain pb-32">
+      <div class="mx-auto w-full max-w-6xl px-5 sm:px-8 pt-14 sm:pt-20">
+
+        <!-- ── header ── -->
+        <header class="rise-in flex flex-col items-center text-center">
+          <p class="font-lao text-[10px] tracking-[.4em] uppercase text-ink-soft/70">A mixtape for you</p>
+          <h1 class="mt-3 font-display text-5xl sm:text-6xl italic text-rosewd-600">Songs for you</h1>
+          <div class="mt-7 w-[min(70vw,300px)] drop-shadow-[0_12px_26px_rgba(122,60,80,.16)]">
+            <CassetteSvg :playing="playing" />
+          </div>
+          <div class="mt-7 flex items-center gap-3 text-cream-400">
+            <span class="h-px w-16 bg-current"></span>
+            <span class="text-rosewd-300 text-lg">♡</span>
+            <span class="h-px w-16 bg-current"></span>
+          </div>
+        </header>
+
+        <!-- ── two columns ── -->
+        <div class="mt-12 grid gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-start">
+
+          <section class="rise-in" style="animation-delay:140ms">
+            <h2 class="font-lao text-[10px] tracking-[.32em] uppercase text-ink-soft/70 mb-4">Tracklist</h2>
+            <TrackList :tracks="tracks" :current-id="currentId" :playing="playing"
+                       :unavailable="unavailable" @toggle="$emit('toggle', $event)" />
+          </section>
+
+          <section class="rise-in" style="animation-delay:260ms">
+            <LinerNote :note="note" />
+          </section>
+        </div>
+      </div>
+
+      <!-- ── transport bar ── -->
+      <div class="fixed inset-x-0 bottom-0 z-30 border-t border-cream-300
+                  bg-cream-50/90 backdrop-blur-md
+                  pb-[env(safe-area-inset-bottom)]">
+        <div class="mx-auto max-w-6xl px-5 sm:px-8 py-3 flex items-center gap-4">
+
+          <div class="min-w-0 flex-1">
+            <p class="font-display text-base leading-tight text-ink truncate">
+              {{ currentTrack ? currentTrack.title : '—' }}
+            </p>
+            <p class="font-lao text-[11px] text-ink-soft truncate">
+              {{ currentTrack ? currentTrack.artist : 'ເລືອກເພງເພື່ອເລີ່ມຟັງ' }}
+            </p>
+          </div>
+
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" @click="$emit('prev')" aria-label="ເພງກ່ອນໜ້າ"
+                    class="grid place-items-center w-9 h-9 rounded-full text-ink-soft hover:text-rosewd-500 transition-colors">
+              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
+                <path d="M7 5h2v14H7zM19 5.8v12.4a1 1 0 0 1-1.6.8l-8.4-6.2a1 1 0 0 1 0-1.6l8.4-6.2a1 1 0 0 1 1.6.8Z"/>
+              </svg>
+            </button>
+
+            <button type="button" @click="$emit('toggle', currentTrack)" aria-label="ຫຼິ້ນ / ຢຸດ"
+                    class="grid place-items-center w-12 h-12 rounded-full bg-rosewd-500 text-cream-50
+                           shadow-[0_6px_16px_rgba(194,95,124,.35)] hover:bg-rosewd-600 transition-colors">
+              <svg v-if="playing" viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
+                <rect x="6" y="4.5" width="4" height="15" rx="1.2"/>
+                <rect x="14" y="4.5" width="4" height="15" rx="1.2"/>
+              </svg>
+              <svg v-else viewBox="0 0 24 24" class="w-5 h-5 translate-x-[1px]" fill="currentColor">
+                <path d="M7 4.8v14.4c0 .8.9 1.3 1.6.9l11-7.2a1 1 0 0 0 0-1.7l-11-7.2A1 1 0 0 0 7 4.8Z"/>
+              </svg>
+            </button>
+
+            <button type="button" @click="$emit('next')" aria-label="ເພງຕໍ່ໄປ"
+                    class="grid place-items-center w-9 h-9 rounded-full text-ink-soft hover:text-rosewd-500 transition-colors">
+              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
+                <path d="M15 5h2v14h-2zM5 5.8v12.4a1 1 0 0 0 1.6.8l8.4-6.2a1 1 0 0 0 0-1.6L6.6 5a1 1 0 0 0-1.6.8Z"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="hidden sm:flex items-center gap-3 w-[38%] shrink-0">
+            <span class="font-lao text-[11px] tabular-nums text-ink-soft w-9 text-right">{{ elapsed }}</span>
+            <input type="range" class="scrub flex-1" min="0" max="100" step="0.1"
+                   :value="progress" @input="$emit('seek', Number($event.target.value))"
+                   aria-label="ເລື່ອນເວລາເພງ">
+            <span class="font-lao text-[11px] tabular-nums text-ink-soft w-9">{{ duration }}</span>
+          </div>
+        </div>
+
+        <!-- thin progress line on mobile -->
+        <div class="sm:hidden h-[3px] bg-cream-300">
+          <div class="h-full bg-rosewd-400 transition-[width] duration-200" :style="{ width: progress + '%' }"></div>
+        </div>
+      </div>
+    </main>`,
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   ROOT — the state machine: sealed → blooming → main
+   ═══════════════════════════════════════════════════════════════ */
+createApp({
+  components: { EnvelopeGate, FloralBurst, MixtapeView },
+  setup() {
+    /* ── stage machine ── */
+    const stage       = ref('sealed');   // 'sealed' | 'blooming' | 'main'
+    const burstMounted = ref(false);
+    const burstFading  = ref(false);
+    const timers = [];
+    const after = (ms, fn) => timers.push(setTimeout(fn, ms));
+
+    const BURST_FULL = 1750;   // matches .field-swell duration
+    const FADE_MS    = 900;    // matches the layer's transition-opacity
+
+    /* ── audio ── */
+    const audio       = new Audio();
+    const currentId   = ref(TRACKS[0].id);
+    const playing     = ref(false);
+    const unavailable = ref([]);
+    const rawTime     = ref(0);
+    const rawDuration = ref(0);
+
+    const currentTrack = computed(() => TRACKS.find(t => t.id === currentId.value) || null);
+    const progress = computed(() =>
+      rawDuration.value ? (rawTime.value / rawDuration.value) * 100 : 0);
+
+    const fmt = s => {
+      if (!isFinite(s) || s < 0) return '0:00';
+      const m = Math.floor(s / 60);
+      return m + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+    };
+    const elapsed  = computed(() => fmt(rawTime.value));
+    const duration = computed(() => fmt(rawDuration.value));
+
+    function load(track) {
+      audio.src = track.src;
+      audio.load();
+    }
+
+    async function play(track) {
+      if (!track || unavailable.value.includes(track.id)) return;
+      if (currentTrack.value?.id !== track.id || !audio.src) {
+        currentId.value = track.id;
+        load(track);
+      }
+      try {
+        await audio.play();
+        playing.value = true;
+      } catch (err) {
+        // autoplay blocked, or the file isn't there yet
+        playing.value = false;
+      }
+    }
+
+    function toggle(track) {
+      if (!track) return;
+      if (track.id === currentId.value && playing.value) {
+        audio.pause();
+        playing.value = false;
+      } else {
+        play(track);
+      }
+    }
+
+    function step(dir) {
+      const i = TRACKS.findIndex(t => t.id === currentId.value);
+      const next = TRACKS[(i + dir + TRACKS.length) % TRACKS.length];
+      play(next);
+    }
+
+    function seek(pct) {
+      if (!rawDuration.value) return;
+      audio.currentTime = (pct / 100) * rawDuration.value;
+      rawTime.value = audio.currentTime;
+    }
+
+    /* ── the sequence ── */
+    function openEnvelope() {
+      if (stage.value !== 'sealed') return;
+
+      stage.value        = 'blooming';   // envelope unmounts
+      burstMounted.value = true;         // flowers mount and start growing
+
+      // start audio inside the click handler — this is the user gesture
+      // that browsers require, so it must not be deferred behind a timer
+      play(TRACKS[0]);
+
+      // flowers now cover the screen → fade the layer out
+      after(BURST_FULL, () => {
+        stage.value       = 'main';      // mixtape mounts underneath
+        burstFading.value = true;
+      });
+
+      // layer is fully transparent → drop it from the DOM
+      after(BURST_FULL + FADE_MS, () => { burstMounted.value = false; });
+    }
+
+    /* ── audio wiring ── */
+    const onTime  = () => { rawTime.value = audio.currentTime; };
+    const onMeta  = () => { rawDuration.value = audio.duration; };
+    const onEnd   = () => { step(1); };
+    const onError = () => {
+      const t = currentTrack.value;
+      if (t && !unavailable.value.includes(t.id)) unavailable.value.push(t.id);
+      playing.value = false;
+    };
+    const onPlay  = () => { playing.value = true; };
+    const onPause = () => { playing.value = false; };
+
+    onMounted(() => {
+      audio.preload = 'metadata';
+      audio.addEventListener('timeupdate', onTime);
+      audio.addEventListener('loadedmetadata', onMeta);
+      audio.addEventListener('ended', onEnd);
+      audio.addEventListener('error', onError);
+      audio.addEventListener('play', onPlay);
+      audio.addEventListener('pause', onPause);
+    });
+
+    onBeforeUnmount(() => {
+      timers.forEach(clearTimeout);
+      audio.pause();
+      audio.removeEventListener('timeupdate', onTime);
+      audio.removeEventListener('loadedmetadata', onMeta);
+      audio.removeEventListener('ended', onEnd);
+      audio.removeEventListener('error', onError);
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('pause', onPause);
+    });
+
+    return {
+      stage, burstMounted, burstFading, openEnvelope,
+      TRACKS, LINER_NOTE,
+      currentId, currentTrack, playing, unavailable,
+      progress, elapsed, duration,
+      toggle, seek, step,
+    };
+  },
+
+  template: `
+    <div>
+      <!-- 4. main content is mounted *underneath* before the flowers fade,
+           so the fade reveals a page that is already there -->
+      <MixtapeView v-if="stage === 'main'"
+                   :tracks="TRACKS" :note="LINER_NOTE"
+                   :current-id="currentId" :current-track="currentTrack"
+                   :playing="playing" :unavailable="unavailable"
+                   :progress="progress" :elapsed="elapsed" :duration="duration"
+                   @toggle="toggle" @seek="seek"
+                   @prev="step(-1)" @next="step(1)" />
+
+      <!-- 2 & 3. floral burst layer -->
+      <FloralBurst v-if="burstMounted" :fading="burstFading" />
+
+      <!-- 1. envelope -->
+      <EnvelopeGate v-if="stage === 'sealed'" @open="openEnvelope" />
+    </div>`,
+}).mount('#app');
+</script>
+</body>
+</html>
