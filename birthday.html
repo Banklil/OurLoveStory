@@ -778,42 +778,37 @@ body.can-edit .sv-edit{display:flex}
   z-index:900;opacity:0;pointer-events:none;transition:opacity .3s;
 }
 .lightbox.open{opacity:1;pointer-events:all}
-/* ແບ່ງສອງຝັ່ງ: ຮູບຢູ່ຊ້າຍ ຄຳອະທິບາຍຢູ່ຂວາ (ຈໍນ້ອຍຊ້ອນເປັນເທິງ-ລຸ່ມ) */
-.lb-inner{
-  position:relative;display:flex;flex-direction:row;
-  width:min(1060px,94vw);max-height:88vh;
-  background:var(--paper);border:3px solid var(--maroon);border-radius:16px;
-  overflow:hidden;
-  box-shadow:6px 8px 0 var(--maroon-dk),0 26px 66px rgba(0,0,0,.7);
-}
-.lb-pane-img{
-  flex:1 1 58%;min-width:0;background:#160409;
-  display:flex;align-items:center;justify-content:center;
-}
+.lb-inner{position:relative;display:flex;flex-direction:column;align-items:center}
 .lb-inner img{
-  display:block;max-width:100%;max-height:88vh;object-fit:contain;
+  max-width:92vw;max-height:88vh;object-fit:contain;
+  border:7px solid var(--paper);border-radius:4px;
+  box-shadow:6px 8px 0 var(--maroon-dk),0 24px 60px rgba(0,0,0,.7);
 }
-.lb-pane-note{
-  flex:1 1 42%;min-width:0;display:flex;flex-direction:column;
-  padding:26px 22px;overflow-y:auto;
+.lb-close{
+  position:absolute;top:-38px;right:0;
+  background:none;border:none;color:var(--paper);font-size:1.7rem;
+  cursor:pointer;opacity:.75;transition:opacity .2s;
 }
-.lb-note-head{
-  margin-bottom:10px;font-family:'Noto Sans Lao',sans-serif;
-  font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-soft);
+.lb-close:hover{opacity:1}
+
+/* ── ເພີ່ມ: ກ່ອງຄຳອະທິບາຍໃຕ້ຮູບ (ຮູບຍັງເປັນແບບເກົ່າທຸກຢ່າງ) ── */
+.lb-note{
+  width:min(92vw,620px);margin-top:14px;
+  background:var(--paper);border:2px solid var(--maroon);border-radius:12px;
+  box-shadow:4px 5px 0 var(--maroon-dk);
+  padding:14px 16px;max-height:32vh;overflow-y:auto;text-align:left;
 }
+.lb-note.hide{display:none}
 .lb-note-text{
-  flex:1;white-space:pre-wrap;color:var(--ink);
+  white-space:pre-wrap;color:var(--ink);
   font-family:'Patrick Hand','Noto Sans Lao',sans-serif;
-  font-size:1.02rem;line-height:1.95;
+  font-size:1rem;line-height:1.9;
 }
-.lb-note-text:empty::before{
-  content:'ຍັງບໍ່ມີຄຳອະທິບາຍສຳລັບຮູບນີ້';color:var(--ink-soft);opacity:.65;
-}
-.lb-note-edit{display:none;flex-direction:column;gap:10px;flex:1}
+.lb-note-edit{display:none;flex-direction:column;gap:9px}
 body.can-edit .lb-note-edit{display:flex}
 body.can-edit .lb-note-text{display:none}
 .lb-note-edit textarea{
-  flex:1;min-height:190px;width:100%;padding:12px;
+  width:100%;min-height:110px;padding:11px;
   border:1px solid var(--paper-sh);border-radius:10px;
   background:var(--paper-lt);color:var(--ink);resize:vertical;
   font-family:'Patrick Hand','Noto Sans Lao',sans-serif;font-size:1rem;line-height:1.8;
@@ -823,20 +818,6 @@ body.can-edit .lb-note-text{display:none}
 .lb-note-status{
   flex:1;min-width:0;font-family:'Noto Sans Lao',sans-serif;
   font-size:.72rem;line-height:1.4;color:var(--ink-soft);
-}
-.lb-close{
-  position:absolute;top:8px;right:10px;z-index:3;
-  width:32px;height:32px;border:none;border-radius:50%;
-  background:rgba(0,0,0,.45);color:#fff;font-size:1.05rem;
-  cursor:pointer;opacity:.85;transition:opacity .2s;
-}
-.lb-close:hover{opacity:1}
-@media(max-width:760px){
-  .lb-inner{flex-direction:column;width:94vw}
-  .lb-pane-img{flex:0 0 auto;max-height:42vh}
-  .lb-inner img{max-height:42vh}
-  .lb-pane-note{flex:1 1 auto;padding:18px 16px}
-  .lb-note-edit textarea{min-height:120px}
 }
 
 /* ══════════════ NAV LINK ══════════════ */
@@ -1172,9 +1153,8 @@ body.can-edit .lb-note-text{display:none}
 <div class="lightbox" id="lightbox">
   <div class="lb-inner">
     <button class="lb-close" onclick="closeLB()">✕</button>
-    <div class="lb-pane-img"><img id="lb-img" src="" alt="Memory"></div>
-    <div class="lb-pane-note">
-      <div class="lb-note-head">ຄຳອະທິບາຍ</div>
+    <img id="lb-img" src="" alt="Memory">
+    <div class="lb-note hide" id="lb-note">
       <div class="lb-note-text" id="lb-note-text"></div>
       <div class="lb-note-edit">
         <textarea id="lb-note-input" maxlength="1200"
@@ -1906,6 +1886,12 @@ function openLB(src, photo){
     const st   = document.getElementById('lb-note-status');
     const sv   = document.getElementById('lb-note-save');
     if(view) view.textContent = txt;
+
+    /* ບໍ່ມີຄຳອະທິບາຍ ແລະ ບໍ່ໄດ້ຢູ່ໂໝດແກ້ໄຂ → ເຊື່ອງກ່ອງໄປເລີຍ
+       ຮູບຈຶ່ງເປັນແບບເກົ່າທຸກຢ່າງ */
+    const box = document.getElementById('lb-note');
+    if(box) box.classList.toggle('hide', !txt && !CAN_EDIT);
+
     if(inp){
         inp.value = txt;
         const ok = !!(photo && photo.id);
@@ -1938,6 +1924,7 @@ async function saveNote(){
     }
     lbPhoto[col] = val;
     document.getElementById('lb-note-text').textContent = val;
+    document.getElementById('lb-note').classList.toggle('hide', !val && !CAN_EDIT);
     st.textContent = 'ບັນທຶກແລ້ວ ✓';
     sv.disabled = false;
 }
