@@ -1345,31 +1345,31 @@ function updateReactBar(){
 /* key = ລຳດັບຮູບ (0–24 ຕາມ Supabase). ຕື່ມ q/a/b ໃສ່ໜ້າໃດກໍ່ໄດ້.
    ຊ່ອງໃດ q ວ່າງ = ໜ້ານັ້ນຈະບໍ່ມີ sticker ຄຳຖາມ. */
 const STORY_QUESTIONS = {
-    0 : { q:'', a:'', b:'' },   // sunrise
-    1 : { q:'', a:'', b:'' },   // a mind
-    2 : { q:'', a:'', b:'' },   // Prince
-    3 : { q:'', a:'', b:'' },   // Bears
-    4 : { q:'', a:'', b:'' },   // The warmth of the sun...
-    5 : { q:'', a:'', b:'' },   // Wonder women
-    6 : { q:'', a:'', b:'' },   // Txxn jc
-    7 : { q:'', a:'', b:'' },   // Moum kharng suay markkk
-    8 : { q:'', a:'', b:'' },   // 🌅
-    9 : { q:'', a:'', b:'' },   // I'm running some flowers over to her.
-    10: { q:'', a:'', b:'' },   // 💐
-    11: { q:'', a:'', b:'' },   // Our first dinner date
-    12: { q:'', a:'', b:'' },   // Tuiii
-    13: { q:'', a:'', b:'' },   // LNY 14/04/2026
-    14: { q:'', a:'', b:'' },   // Suay maiyyyyy
-    15: { q:'', a:'', b:'' },   // Mou
-    16: { q:'', a:'', b:'' },   // Khao bout
-    17: { q:'', a:'', b:'' },   // Bankhot
-    18: { q:'', a:'', b:'' },   // 🍽️😋
-    19: { q:'', a:'', b:'' },   // Suea khu
-    20: { q:'', a:'', b:'' },   // Anniversary 2
-    21: { q:'', a:'', b:'' },   // "~"
-    22: { q:'', a:'', b:'' },   // Si nar phu t dai pen t 1 nai jai khoii
-    23: { q:'', a:'', b:'' },   // Mod
-    24: { q:'', a:'', b:'' },   // To mouuu
+    0 : { q:'Kh Up houp ny mue dh', a:'phout', b:'pha hut' ,c:'chan'},   // sunrise
+    1 : { q:'Kh btk hux ph jux thuea mue up houp ', a:'15', b:'5',c:'8' },   // a mind
+    2 : { q:'sout suay khrng aiy bank', a:'man', b:'bor' },   // Prince
+    3 : { q:'tone ny ph jux lo na..', a:'48', b:'52' },   // Bears
+    4 : { q:'houp ny phai pen khn up ', a:'ph', b:'kh' },   // The warmth of the sun...
+    5 : { q:'houp ny kh kod jai hai bor', a:'Kod', b:'bor' },   // Wonder women
+    6 : { q:'harn ny sue yh', a:'intalien job', b:'job intalien' },   // Txxn jc
+    7 : { q:'ph khit va ph suay sam lup kh jux %', a:'max', b:'100' },   // Moum kharng suay markkk
+    8 : { q:'kai kup khai phai kert kone', a:'khai', b:'kai' },   // 🌅
+    9 : { q:'nai sor drk mai mi drk mai jux drk ', a:'11', b:'13' },   // I'm running some flowers over to her.
+    10: { q:'hu suek yh tone t dai drk mai', a:'hu suek va aiy bank lor', b:'aiy bank lor khue kun ' },   // 💐
+    11: { q:'khern bor tone ny ', a:'khern', b:'bor khern ' },   // Our first dinner date
+    12: { q:'pen mia khoii bor', a:'pen', b:'pen' },   // Tuiii
+    13: { q:'phai pen fan', a:'ph', b:'kh' },   // LNY 14/04/2026
+    14: { q:'sout suay aiy bank', a:'man', b:'man' },   // Suay maiyyyyy
+    15: { q:'ny khue tua a raiy', a:'mou', b:'mou' },   // Mou
+    16: { q:'eyh boot vai kua khao ', a:'ph', b:'ph' },   // Khao bout
+    17: { q:'harm ern bank hot', a:'doiy', b:'khue khor nueng' },   // Bankhot
+    18: { q:'what', a:'what', b:'what' },   // 🍽️😋
+    19: { q:'penyh khue mux sh suea khu ', a:'hux fan ', b:'eim jai' },   // Suea khu
+    20: { q:'phai mux luem vun khop hrp', a:'ph', b:'kh' },   // Anniversary 2
+    21: { q:'hux ph ner ', a:'hux aiy bank', b:'hux aiy bank' },   // "~"
+    22: { q:'mue nueng kh bor sa baiy bey si lhueak hyh ', a:'nrn', b:'hua',c:'de jai',d:'bg fan' },   // Si nar phu t dai pen t 1 nai jai khoii
+    23: { q:'hux kh laiy bor', a:'hux laiy ', b:'bor hux ' },   // Mod
+    24: { q:'mouuuu', a:'m', b:'o',c:'u' },   // To mouuu
 };
 let stAnswers={};
 try{ stAnswers=JSON.parse(localStorage.getItem('st-answers')||'{}'); }catch(e){}
