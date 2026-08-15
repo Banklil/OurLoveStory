@@ -421,26 +421,31 @@ body.gate-open{overflow:hidden}
 }
 
 /* ── IG-style question / poll sticker ── */
+/* ວາງໄວ້ຂອບລຸ່ມ ບໍ່ແມ່ນກາງຮູບ — ໜ້າຄົນມັກຢູ່ກາງ ສະຕິກເກີຈຶ່ງບັງພໍດີ */
 .sv-qz{
-  position:absolute;left:50%;top:24%;transform:translateX(-50%);
-  width:min(310px,84%);z-index:6;
+  position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
+  width:min(300px,86%);z-index:6;
   display:none;flex-direction:column;
-  border-radius:20px;overflow:hidden;
-  box-shadow:0 14px 44px rgba(0,0,0,.55);
+  border-radius:18px;overflow:hidden;
+  box-shadow:0 12px 34px rgba(0,0,0,.5);
   pointer-events:auto;
 }
 .sv-qz.show{display:flex;animation:qzPop .42s cubic-bezier(.34,1.56,.64,1)}
 @keyframes qzPop{0%{transform:translateX(-50%) scale(.7);opacity:0}100%{transform:translateX(-50%) scale(1);opacity:1}}
 .sv-qz-q{
-  background:#2b2b2b;color:#fff;font-weight:700;
+  background:rgba(30,30,30,.85);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  color:#fff;font-weight:700;
   text-transform:uppercase;letter-spacing:.02em;
   font-family:'Gochi Hand','Noto Sans Lao',sans-serif;
-  font-size:1.08rem;text-align:center;padding:15px 16px;line-height:1.28;
+  font-size:1rem;text-align:center;padding:12px 14px;line-height:1.26;
 }
-.sv-qz-opts{background:#efe9df;padding:12px;display:flex;flex-direction:column;gap:10px}
+.sv-qz-opts{
+  background:rgba(239,233,223,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  padding:10px;display:flex;flex-direction:column;gap:8px;
+}
 .sv-qz-opt{
-  background:#fff;border:none;border-radius:13px;
-  padding:13px 16px;text-align:left;font-size:1rem;color:#2b2b2b;
+  background:#fff;border:none;border-radius:12px;
+  padding:10px 14px;text-align:left;font-size:.95rem;color:#2b2b2b;
   cursor:pointer;
   font-family:'Patrick Hand','Noto Sans Lao',sans-serif;
   box-shadow:0 2px 6px rgba(0,0,0,.09);
