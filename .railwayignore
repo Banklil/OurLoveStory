@@ -1,0 +1,5 @@
+# Source art and the saved page it came from. The cut-out, web-sized
+# versions the site actually loads live in assets/ and are deployed.
+card 1.html
+card 1_files/
+flower *.jpg
