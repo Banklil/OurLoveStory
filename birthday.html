@@ -6,7 +6,7 @@
 <title>Happy Birthday stinky ❤️</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Lao:wght@300;400;700&family=Noto+Sans+Lao:wght@300;400;700&family=Caveat:wght@400;600;700&family=Gochi+Hand&family=Patrick+Hand&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="assets/envelope.webp">
+<link rel="preload" as="image" href="assets/seal.webp">
 <link rel="preload" as="image" href="assets/flower1.webp">
 <link rel="preload" as="image" href="assets/flower3.webp">
 <link rel="preload" as="image" href="assets/flower4.webp">
@@ -66,12 +66,46 @@ body{
   -webkit-tap-highlight-color:transparent;
   transition:transform .55s cubic-bezier(.34,1.56,.64,1),opacity .55s ease;
 }
-.env-btn img{
-  width:clamp(210px,58vw,360px);height:auto;display:block;
-  filter:drop-shadow(0 22px 44px rgba(0,0,0,.55));
+/* ຊອງຈົດໝາຍປິດຜະນຶກ — ສ້າງດ້ວຍ CSS ຍ້ອນຮູບ card 1 ທີ່ມີເປັນຊອງເປີດຢູ່ແລ້ວ.
+   ສີທັງໝົດດຶງມາຈາກຮູບຂອງຈິງ ຈຶ່ງເຂົ້າກັນກັບຕາປະທັບ. */
+.env-stage{
+  width:clamp(200px,56vw,330px);
+  perspective:1000px;
   animation:envFloat 3s ease-in-out infinite;
 }
-.env-btn.opening{transform:scale(.45) translateY(-16px);opacity:0}
+.env-3d{
+  position:relative;width:100%;aspect-ratio:320/216;
+  transform-style:preserve-3d;
+  filter:drop-shadow(0 22px 40px rgba(0,0,0,.55));
+}
+.env-front{
+  position:absolute;inset:0;border-radius:9px;
+  background:linear-gradient(158deg,#ded6c4 0%,#cfc7b4 46%,#c2b9a4 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+}
+.env-front::after{        /* ຮອຍພັບຮູບ V ຂອງດ້ານໜ້າ */
+  content:'';position:absolute;inset:0;border-radius:9px;
+  background:
+    linear-gradient(to bottom right,transparent calc(50% - .7px),rgba(138,126,103,.42) 50%,transparent calc(50% + .7px)),
+    linear-gradient(to bottom left, transparent calc(50% - .7px),rgba(138,126,103,.42) 50%,transparent calc(50% + .7px));
+}
+.env-flap{                /* ຝາປິດ ພັບຂຶ້ນຕອນກົດ */
+  position:absolute;top:0;left:0;width:100%;height:62%;
+  clip-path:polygon(0 0,100% 0,50% 100%);
+  background:linear-gradient(180deg,#e4dccb 0%,#d2cab7 72%,#c3baa6 100%);
+  transform-origin:50% 0%;transform:rotateX(0deg);
+  transition:transform .72s cubic-bezier(.55,.06,.32,1);
+  z-index:3;
+}
+.env-seal{
+  position:absolute;left:50%;top:56%;width:20%;height:auto;
+  transform:translate(-50%,-50%);z-index:4;
+  filter:drop-shadow(0 4px 9px rgba(0,0,0,.45));
+  transition:opacity .35s ease,transform .45s ease;
+}
+#gate.opening .env-flap{transform:rotateX(-166deg)}
+#gate.opening .env-seal{opacity:0;transform:translate(-50%,-50%) scale(.45)}
+.env-btn.opening{transform:scale(.5) translateY(-18px);opacity:0}
 @keyframes envFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
 .gate-hint{margin-top:26px;text-align:center;animation:hintPulse 1.9s ease-in-out infinite}
 .gate-hint b{
@@ -163,7 +197,7 @@ body{
 .lt-btn:hover{background:var(--maroon-lt);transform:translateY(-2px)}
 body.gate-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){
-  .env-btn img,.gate-hint{animation:none}
+  .env-stage,.gate-hint{animation:none}
   #bloom.on #bloom-field,#bloom.on .bloom-f,#bloom.on .bloom-flash{animation-duration:.01s}
 }
 
@@ -775,8 +809,13 @@ body.gate-open{overflow:hidden}
 <!-- ══ ຊອງຈົດໝາຍ → ດອກໄມ້ບານ → card ຈົດໝາຍ ══ -->
 <div id="gate">
   <button class="env-btn" id="env-btn" type="button" aria-label="ກົດເພື່ອເປີດຈົດໝາຍ">
-    <img src="assets/envelope.webp" width="446" height="577"
-         alt="ຊອງຈົດໝາຍປິດຜະນຶກດ້ວຍຕາປະທັບຫົວໃຈ">
+    <div class="env-stage">
+      <div class="env-3d" role="img" aria-label="ຊອງຈົດໝາຍປິດຜະນຶກດ້ວຍຕາປະທັບຫົວໃຈ">
+        <div class="env-front"></div>
+        <div class="env-flap"></div>
+        <img class="env-seal" src="assets/seal.webp" alt="" width="395" height="420">
+      </div>
+    </div>
   </button>
   <div class="gate-hint">
     <b>Tap to open</b>
@@ -1110,14 +1149,19 @@ const CFG = {
         const bgm = document.getElementById('bgm');
         if(bgm) bgm.play().catch(()=>{});
 
-        envBtn.classList.add('opening');
+        /* ຝາຊອງພັບເປີດກ່ອນ ດອກໄມ້ຈຶ່ງບານ — ບໍ່ດັ່ງນັ້ນມັນເບິ່ງຄືຊອງເປີດຢູ່ແລ້ວ */
         gate.classList.add('opening');
-        buildFlowers();
-        requestAnimationFrame(()=> bloom.classList.add('on'));
 
-        setTimeout(function(){ gate.classList.add('gone'); }, 1500);
-        setTimeout(function(){ letter.classList.add('on'); }, 1750);
-        setTimeout(function(){ bloom.classList.add('off'); }, 2400);
+        const FOLD = 620;
+        setTimeout(function(){
+            envBtn.classList.add('opening');
+            buildFlowers();
+            requestAnimationFrame(function(){ bloom.classList.add('on'); });
+        }, FOLD);
+
+        setTimeout(function(){ gate.classList.add('gone'); }, FOLD + 1500);
+        setTimeout(function(){ letter.classList.add('on'); }, FOLD + 1750);
+        setTimeout(function(){ bloom.classList.add('off'); }, FOLD + 2400);
     }
 
     function closeLetter(){
