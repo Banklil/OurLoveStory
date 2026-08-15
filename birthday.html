@@ -6,6 +6,8 @@
 <title>Happy Birthday stinky ❤️</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Lao:wght@300;400;700&family=Noto+Sans+Lao:wght@300;400;700&family=Caveat:wght@400;600;700&family=Gochi+Hand&family=Patrick+Hand&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/envelope-closed.webp">
+<link rel="preload" as="image" href="assets/envelope-open.webp">
 <link rel="preload" as="image" href="assets/seal.webp">
 <link rel="preload" as="image" href="assets/flower1.webp">
 <link rel="preload" as="image" href="assets/flower3.webp">
@@ -66,44 +68,30 @@ body{
   -webkit-tap-highlight-color:transparent;
   transition:transform .55s cubic-bezier(.34,1.56,.64,1),opacity .55s ease;
 }
-/* ຊອງຈົດໝາຍປິດຜະນຶກ — ສ້າງດ້ວຍ CSS ຍ້ອນຮູບ card 1 ທີ່ມີເປັນຊອງເປີດຢູ່ແລ້ວ.
-   ສີທັງໝົດດຶງມາຈາກຮູບຂອງຈິງ ຈຶ່ງເຂົ້າກັນກັບຕາປະທັບ. */
+/* ຊອງຈົດໝາຍ — ໃຊ້ຮູບຂອງທ່ານເອງ.
+   ຮູບຕົ້ນສະບັບເປັນຊອງເປີດ ຈຶ່ງພັບຝາລົງມາເຮັດເປັນຊອງປິດ (envelope-closed.webp).
+   ກົດແລ້ວ ຊອງປິດຈາງເປັນຊອງເປີດ — ຝາຈຶ່ງເບິ່ງຄືງັດຂຶ້ນ. */
 .env-stage{
-  width:clamp(200px,56vw,330px);
-  perspective:1000px;
+  position:relative;width:clamp(200px,56vw,330px);
+  aspect-ratio:445/331;
   animation:envFloat 3s ease-in-out infinite;
 }
-.env-3d{
-  position:relative;width:100%;aspect-ratio:320/216;
-  transform-style:preserve-3d;
-  filter:drop-shadow(0 22px 40px rgba(0,0,0,.55));
+.env-stage img{
+  display:block;
+  filter:drop-shadow(0 20px 38px rgba(0,0,0,.55));
+  transition:opacity .5s ease;
 }
-.env-front{
-  position:absolute;inset:0;border-radius:9px;
-  background:linear-gradient(158deg,#ded6c4 0%,#cfc7b4 46%,#c2b9a4 100%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
-}
-.env-front::after{        /* ຮອຍພັບຮູບ V ຂອງດ້ານໜ້າ */
-  content:'';position:absolute;inset:0;border-radius:9px;
-  background:
-    linear-gradient(to bottom right,transparent calc(50% - .7px),rgba(138,126,103,.42) 50%,transparent calc(50% + .7px)),
-    linear-gradient(to bottom left, transparent calc(50% - .7px),rgba(138,126,103,.42) 50%,transparent calc(50% + .7px));
-}
-.env-flap{                /* ຝາປິດ ພັບຂຶ້ນຕອນກົດ */
-  position:absolute;top:0;left:0;width:100%;height:62%;
-  clip-path:polygon(0 0,100% 0,50% 100%);
-  background:linear-gradient(180deg,#e4dccb 0%,#d2cab7 72%,#c3baa6 100%);
-  transform-origin:50% 0%;transform:rotateX(0deg);
-  transition:transform .72s cubic-bezier(.55,.06,.32,1);
-  z-index:3;
-}
+.env-closed{position:absolute;inset:0;width:100%;height:100%}
+/* ຊອງເປີດສູງກວ່າ ຈຶ່ງຢຶດຈາກລຸ່ມ ໃຫ້ຕົວຊອງຊ້ອນກັນພໍດີ ຝາລົ້ນຂຶ້ນເທິງ */
+.env-open{position:absolute;left:0;bottom:0;width:100%;height:auto;opacity:0}
 .env-seal{
-  position:absolute;left:50%;top:56%;width:20%;height:auto;
-  transform:translate(-50%,-50%);z-index:4;
+  position:absolute;left:50%;top:66%;width:20%;height:auto;z-index:4;
+  transform:translate(-50%,-50%);
   filter:drop-shadow(0 4px 9px rgba(0,0,0,.45));
-  transition:opacity .35s ease,transform .45s ease;
+  transition:opacity .4s ease,transform .5s ease;
 }
-#gate.opening .env-flap{transform:rotateX(-166deg)}
+#gate.opening .env-closed{opacity:0}
+#gate.opening .env-open{opacity:1}
 #gate.opening .env-seal{opacity:0;transform:translate(-50%,-50%) scale(.45)}
 .env-btn.opening{transform:scale(.5) translateY(-18px);opacity:0}
 @keyframes envFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
@@ -130,13 +118,13 @@ body{
   position:absolute;left:50%;top:50%;
   width:170vmax;height:170vmax;transform:translate(-50%,-50%) scale(.3);
 }
-#bloom.on #bloom-field{animation:fieldSwell 1.75s cubic-bezier(.16,.68,.32,1) forwards}
+#bloom.on #bloom-field{animation:fieldSwell 2.5s cubic-bezier(.16,.68,.32,1) forwards}
 @keyframes fieldSwell{to{transform:translate(-50%,-50%) scale(1.2)}}
 .bloom-f{
   position:absolute;height:auto;opacity:0;
   transform:translate(-50%,-50%) scale(0);will-change:transform,opacity;
 }
-#bloom.on .bloom-f{animation:bloomPop .66s cubic-bezier(.34,1.56,.64,1) both}
+#bloom.on .bloom-f{animation:bloomPop .72s cubic-bezier(.34,1.56,.64,1) both}
 @keyframes bloomPop{
   0%{transform:translate(-50%,-50%) scale(0) rotate(var(--r0));opacity:0}
   60%{opacity:1}
@@ -810,11 +798,10 @@ body.gate-open{overflow:hidden}
 <div id="gate">
   <button class="env-btn" id="env-btn" type="button" aria-label="ກົດເພື່ອເປີດຈົດໝາຍ">
     <div class="env-stage">
-      <div class="env-3d" role="img" aria-label="ຊອງຈົດໝາຍປິດຜະນຶກດ້ວຍຕາປະທັບຫົວໃຈ">
-        <div class="env-front"></div>
-        <div class="env-flap"></div>
-        <img class="env-seal" src="assets/seal.webp" alt="" width="395" height="420">
-      </div>
+      <img class="env-closed" src="assets/envelope-closed.webp" width="445" height="331"
+           alt="ຊອງຈົດໝາຍປິດຜະນຶກດ້ວຍຕາປະທັບຫົວໃຈ">
+      <img class="env-open" src="assets/envelope-open.webp" width="446" height="577" alt="">
+      <img class="env-seal" src="assets/seal.webp" width="395" height="420" alt="">
     </div>
   </button>
   <div class="gate-hint">
@@ -1112,7 +1099,7 @@ const CFG = {
                      'assets/flower4.webp','assets/flower4.webp','assets/flower4.webp',
                      'assets/flower3.webp','assets/flower3.webp',
                      'assets/flower5.webp'];
-    const COUNT = 74;
+    const COUNT = 110;
     let opened = false;
 
     document.body.classList.add('gate-open');
@@ -1135,7 +1122,7 @@ const CFG = {
             img.style.width = size + '%';
             img.style.setProperty('--r0', (Math.random()*180-90).toFixed(0)+'deg');
             img.style.setProperty('--r1', (Math.random()*60-30).toFixed(0)+'deg');
-            img.style.animationDelay = Math.round(rad*760 + Math.random()*130) + 'ms';
+            img.style.animationDelay = Math.round(rad*1150 + Math.random()*220) + 'ms';
             frag.appendChild(img);
         }
         field.appendChild(frag);
@@ -1159,9 +1146,9 @@ const CFG = {
             requestAnimationFrame(function(){ bloom.classList.add('on'); });
         }, FOLD);
 
-        setTimeout(function(){ gate.classList.add('gone'); }, FOLD + 1500);
-        setTimeout(function(){ letter.classList.add('on'); }, FOLD + 1750);
-        setTimeout(function(){ bloom.classList.add('off'); }, FOLD + 2400);
+        setTimeout(function(){ gate.classList.add('gone'); }, FOLD + 2300);
+        setTimeout(function(){ letter.classList.add('on'); }, FOLD + 3100);
+        setTimeout(function(){ bloom.classList.add('off'); }, FOLD + 3800);
     }
 
     function closeLetter(){
