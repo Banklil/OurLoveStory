@@ -2065,9 +2065,37 @@ async function loadSpaceGallery(){
         gallery.innerHTML='';
 
         /* ── Masonry-style initial positions (absolute) ── */
+        const gap=12;
+        const wraps=[];
+        let userMoved=false;      /* ພໍລາກກາດແລ້ວ ຢຸດຈັດໃໝ່ ບໍ່ດັ່ງນັ້ນມັນຈະເດັ້ງກັບ */
+
+        /* ຈັດຕຳແໜ່ງຈາກຄວາມສູງຈິງຂອງກາດ.
+           ຂອງເກົ່າຄາດເອົາວ່າທຸກຮູບເປັນ 4:3 ແຕ່ຮູບຈິງແມ່ນ 1.25 ຫາ 1.78
+           ຜິດໄດ້ຮອດ 33% ກາດຈຶ່ງຊ້ອນກັນ ຫຼື ເກີດຊ່ອງຫວ່າງໃຫຍ່ */
+        function layoutGallery(){
+            if(userMoved) return;
+            const totalW=gallery.offsetWidth||window.innerWidth-20;
+            const cols=totalW<500?2:totalW<800?3:4;
+            const cardW=Math.floor((totalW-(cols+1)*gap)/cols);
+            const colH=Array(cols).fill(gap);
+            wraps.forEach(function(w){
+                w.style.width=cardW+'px';
+                const c=colH.indexOf(Math.min.apply(null,colH));
+                w.style.left=(gap+c*(cardW+gap))+'px';
+                w.style.top=colH[c]+'px';
+                colH[c]+=w.offsetHeight+gap;
+            });
+            gallery.style.height=(Math.max.apply(null,colH)+gap)+'px';
+        }
+
+        let relayoutTimer=null;
+        function scheduleLayout(){
+            clearTimeout(relayoutTimer);
+            relayoutTimer=setTimeout(layoutGallery,60);
+        }
+
         const totalW=gallery.offsetWidth||window.innerWidth-20;
         const cols=totalW<500?2:totalW<800?3:4;
-        const gap=12;
         const cardW=Math.floor((totalW-(cols+1)*gap)/cols);
         const colH=Array(cols).fill(gap);
 
@@ -2104,10 +2132,21 @@ async function loadSpaceGallery(){
 
             /* drag */
             makeDraggable(wrap, ()=>openLB(photo.image_url, photo));
+            wrap.addEventListener('mousedown',function(){ userMoved=true; });
+            wrap.addEventListener('touchstart',function(){ userMoved=true; },{passive:true});
+
+            wraps.push(wrap);
+            const im=inner.querySelector('img');
+            if(im){
+                if(im.complete) scheduleLayout();
+                im.addEventListener('load', scheduleLayout);
+                im.addEventListener('error', scheduleLayout);
+            }
         });
 
-        /* set container height */
         gallery.style.height=(Math.max(...colH)+gap)+'px';
+        scheduleLayout();
+        window.addEventListener('resize', scheduleLayout);
 
     }catch(err){
         gallery.innerHTML='<div style="text-align:center;padding:40px;color:rgba(255,100,100,.6)">ດຶງຮູບບໍ່ໄດ້ — ກວດ network</div>';
