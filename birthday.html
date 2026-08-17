@@ -824,7 +824,7 @@ body.can-edit .sv-edit{display:flex}
 body.can-edit .lb-note-edit{display:flex}
 body.can-edit .lb-note-text{display:none}
 .lb-note-edit textarea{
-  width:100%;min-height:200px;padding:11px;
+  width:100%;min-height:200px;max-height:60vh;padding:11px;overflow-y:auto;
   border:1px solid var(--paper-sh);border-radius:10px;
   background:var(--paper-lt);color:var(--ink);resize:vertical;
   font-family:'Patrick Hand','Noto Sans Lao',sans-serif;font-size:1rem;line-height:1.8;
@@ -1148,7 +1148,7 @@ body.can-edit .lb-note-text{display:none}
   <div class="cap-ed" id="cap-ed">
     <div class="cap-ed-box">
       <label for="cap-ed-input">ຂໍ້ຄວາມໃຕ້ຮູບ</label>
-      <textarea id="cap-ed-input" rows="3" maxlength="300"
+      <textarea id="cap-ed-input" rows="3"
                 placeholder="ພິມຂໍ້ຄວາມທີ່ຢາກໃຫ້ຂຶ້ນໃຕ້ຮູບນີ້…"></textarea>
       <div class="cap-ed-row">
         <span class="cap-ed-status" id="cap-ed-status"></span>
@@ -1179,7 +1179,7 @@ body.can-edit .lb-note-text{display:none}
       <div class="lb-note-head">ຄຳອະທິບາຍ</div>
       <div class="lb-note-text" id="lb-note-text"></div>
       <div class="lb-note-edit">
-        <textarea id="lb-note-input" maxlength="1200"
+        <textarea id="lb-note-input"
                   placeholder="ພິມຄຳອະທິບາຍຂອງຮູບນີ້…"></textarea>
         <div class="lb-note-row">
           <span class="lb-note-status" id="lb-note-status"></span>
@@ -1924,12 +1924,23 @@ function openLB(src, photo){
     if(box) box.classList.toggle('hide', !txt && !CAN_EDIT);
     if(inp){
         inp.value = txt;
+        autoGrow(inp);
         const ok = !!(photo && photo.id);
         sv.disabled = !ok;
         st.textContent = ok ? '' : 'ຮູບນີ້ບໍ່ໄດ້ມາຈາກ Supabase ຈຶ່ງບັນທຶກບໍ່ໄດ້';
     }
     lbEl.classList.add('open');
 }
+
+/* ໃຫ້ກ່ອງສູງຂຶ້ນຕາມທີ່ພິມ ຈະໄດ້ບໍ່ຕ້ອງເລື່ອນຫາ */
+function autoGrow(el){
+    if(!el) return;
+    el.style.height='auto';
+    el.style.height=Math.min(el.scrollHeight+2, window.innerHeight*0.6)+'px';
+}
+document.addEventListener('input', function(e){
+    if(e.target && e.target.id==='lb-note-input') autoGrow(e.target);
+});
 
 async function saveNote(){
     if(!lbPhoto || !lbPhoto.id) return;
