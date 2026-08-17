@@ -164,16 +164,24 @@ body{
 }
 .lt-card h3{
   font-family:'Caveat','Noto Serif Lao',cursive;font-weight:700;
-  font-size:2rem;color:var(--maroon);margin-bottom:14px;
+  font-size:2.15rem;line-height:1.2;letter-spacing:.01em;
+  color:var(--maroon);margin-bottom:16px;
 }
+/* ຂໍ້ຄວາມເປັນພາສາອັງກິດ ໃຊ້ font ລາຍມືຈຶ່ງເຂົ້າກັບກາດເຈ້ຍ
+   ຂອງເກົ່າໃຊ້ Noto Sans Lao ເຊິ່ງພາສາອັງກິດຈະຕົກໄປ fallback ແປ່ນໆ */
 .lt-card p{
-  font-family:'Noto Sans Lao',sans-serif;font-size:.94rem;line-height:2;
-  margin-bottom:12px;text-align:left;
+  font-family:'Patrick Hand','Noto Sans Lao',cursive;
+  font-size:1.06rem;line-height:1.72;letter-spacing:.006em;
+  color:var(--ink);margin-bottom:13px;text-align:left;
 }
+.lt-card p:last-of-type{margin-bottom:0}
 .lt-sign{
-  text-align:right !important;margin-top:16px !important;line-height:1.5 !important;
+  text-align:right !important;
+  margin-top:20px !important;padding-top:13px;
+  border-top:1px dashed var(--paper-sh);
+  line-height:1.4 !important;
   font-family:'Caveat','Noto Serif Lao',cursive !important;
-  font-size:1.4rem !important;color:var(--maroon-lt);
+  font-size:1.6rem !important;color:var(--maroon-lt);
 }
 .lt-btn{
   margin-top:18px;padding:11px 26px;border:0;border-radius:99px;cursor:pointer;
