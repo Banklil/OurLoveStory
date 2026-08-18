@@ -11,7 +11,6 @@
 <link rel="preload" as="image" href="assets/seal.webp">
 <link rel="preload" as="image" href="assets/flower1.webp">
 <link rel="preload" as="image" href="assets/flower3.webp">
-<link rel="preload" as="image" href="assets/flower4.webp">
 <link rel="preload" as="image" href="assets/flower5.webp">
 <style>
 /* ─── RESET ─── */
@@ -1260,12 +1259,11 @@ const CFG = {
     const ltBtn  = document.getElementById('lt-btn');
     if(!gate || !envBtn) return;
 
-    /* flower 2 ບໍ່ໄດ້ໃຊ້ — ມີລາຍນ້ຳ pngtree ຕິດຢູ່ເທິງກີບດອກ.
-       ຊ້ຳລາຍຊື່ເພື່ອຖ່ວງນ້ຳໜັກ: ຢາກໃຫ້ຊົມພູ+ຂາວເປັນຫຼັກ
-       ດອກຕາເວັນເຫຼືອງແຮງ ໃສ່ໜ້ອຍດຽວພໍໃຫ້ມີສີຕັດ */
-    const FLOWERS = ['assets/flower1.webp','assets/flower1.webp','assets/flower1.webp',
-                     'assets/flower4.webp','assets/flower4.webp','assets/flower4.webp',
-                     'assets/flower3.webp','assets/flower3.webp',
+    /* flower 2 ບໍ່ໄດ້ໃຊ້ — ມີລາຍນ້ຳ pngtree ຕິດຢູ່ເທິງກີບດອກ
+       flower 4 (ດອກຂາວ) ບໍ່ໄດ້ໃຊ້ — ຕາມທີ່ສັ່ງ
+       ຊ້ຳລາຍຊື່ເພື່ອຖ່ວງນ້ຳໜັກ: ຊົມພູເປັນຫຼັກ ດອກຕາເວັນໃສ່ໜ້ອຍດຽວພໍໃຫ້ມີສີຕັດ */
+    const FLOWERS = ['assets/flower1.webp','assets/flower1.webp','assets/flower1.webp','assets/flower1.webp',
+                     'assets/flower3.webp','assets/flower3.webp','assets/flower3.webp',
                      'assets/flower5.webp'];
     const COUNT = 110;
     let opened = false;
