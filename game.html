@@ -106,7 +106,7 @@ canvas{flex:1;display:block;width:100%;touch-action:none;cursor:crosshair}
 
   <div id="hint">
     <div class="big">ກົດເພື່ອຢ່ອນເບັດ</div>
-    <div class="sm">TAP TO CAST · ເລື່ອນນິ້ວເພື່ອບັງຄັບ</div>
+    <div class="sm">ເລື່ອນນິ້ວບັງຄັບ · ຕອນປາດີ້ນຂຶ້ນ ຕ້ອງເອົາເຮືອໄປຮັບ</div>
   </div>
 
   <div id="pop"><div class="amt" id="pop-amt"></div><div class="sub" id="pop-sub"></div></div>
@@ -181,7 +181,7 @@ const persist = () => { try{ localStorage.setItem(SAVE, JSON.stringify(save)); }
 /* ── ຄ່າອັບເກຣດ ── */
 const UP = {
     line: {base:30, mul:1.55, of:l=>400 + l*120},     /* ຄວາມເລິກ: ເລີ່ມ 40 m (px/10 = m) */
-    hook: {base:45, mul:1.95, of:l=>1 + l},           /* ຕິດໄດ້ຈັກໜ້າ */
+    hook: {base:45, mul:1.85, of:l=>3 + l*2},         /* ຕິດໄດ້ຈັກໜ້າ — ເລີ່ມ 3 */
     reel: {base:25, mul:1.65, of:l=>115 + l*26},      /* ຄວາມໄວມ້ວນ (px/s) */
 };
 const cost  = k => Math.round(UP[k].base * Math.pow(UP[k].mul, save[k]));
@@ -208,6 +208,8 @@ let camY = 0;                       /* ກ້ອງເລື່ອນຕາມ�
 let fishes = [];
 let hooked = [];
 let sparkles = [];
+let tossing = [];          /* ໜ້າທີ່ກຳລັງດີ້ນຂຶ້ນຫາເຮືອ */
+const BOAT_HALF = 34;      /* ເຄິ່ງຄວາມກວ້າງເຮືອ — ຕ້ອງຕົກໃນນີ້ຈຶ່ງໄດ້ */
 
 /* ── ໜ້າທີ່ລອຍຢູ່ ──
    ຢູ່ເລິກ = ຄ່າສູງກວ່າ ຈຶ່ງມີເຫດຜົນທີ່ຈະອັບເກຣດສາຍເບັດ */
@@ -291,12 +293,14 @@ function refreshHud(){
 }
 
 /* ── ສະຫຼຸບ ── */
-function showPop(amount, n){
+function showPop(amount, n, missed){
     const p = document.getElementById('pop');
     document.getElementById('pop-amt').textContent = '+$' + amount;
-    document.getElementById('pop-sub').textContent = n ? ('ຕິດເບັດ ' + n + ' ໜ້າ 💕') : 'ບໍ່ຕິດເລີຍ 🥲';
+    document.getElementById('pop-sub').textContent =
+        n ? ('ຮັບໄດ້ ' + n + ' ໜ້າ 💕' + (missed ? '  ·  ຫຼຸດ ' + missed + ' 🥲' : ''))
+          : (missed ? ('ຫຼຸດໝົດ ' + missed + ' ໜ້າ 🥲') : 'ບໍ່ຕິດເລີຍ 🥲');
     p.classList.add('on');
-    setTimeout(()=>p.classList.remove('on'), 1100);
+    setTimeout(()=>p.classList.remove('on'), 1300);
 }
 
 /* ── ຄື້ນນ້ຳ ──
@@ -390,13 +394,52 @@ function update(dt){
         hook.y -= reelSpd() * load * dt;
         if(hook.y <= WATER_Y){
             hook.y = WATER_Y;
-            const amount = hooked.reduce((s,f)=>s + TIER[f.t].val, 0);
-            save.money  += amount;
-            save.caught += hooked.length;
-            save.best    = Math.max(save.best, Math.round(bottom - WATER_Y));
+            save.best = Math.max(save.best, Math.round(bottom - WATER_Y));
+            /* ດີ້ນຂຶ້ນເທື່ອລະໂຕ ຈະໄດ້ມີເວລາຍ້າຍເຮືອໄປຮັບ */
+            tossing = hooked.map((f, i) => ({
+                f, x: hook.x, y: WATER_Y,
+                vx: (Math.random()-.5)*150,
+                vy: -300 - Math.random()*110,
+                spin: (Math.random()-.5)*9,
+                rot: 0,
+                wait: i*0.42,
+                scored: null,
+            }));
+            hooked = []; fishes = [];
+            mode = tossing.length ? 'toss' : 'idle';
+            if(!tossing.length) showPop(0, 0);
+            splash(hook.x, WATER_Y, 10);
+        }
+    }else if(mode === 'toss'){
+        let live = 0;
+        for(const o of tossing){
+            if(o.scored !== null) continue;
+            live++;
+            if(o.wait > 0){ o.wait -= dt; continue; }
+            o.x += o.vx*dt;
+            o.y += o.vy*dt;
+            o.vy += 640*dt;                       /* ແຮງໂນ້ມຖ່ວງ */
+            o.rot += o.spin*dt;
+            o.vx += Math.sin(T*14 + o.spin)*22*dt; /* ດີ້ນໄປມາ */
+
+            if(o.vy > 0 && o.y >= waveY(o.x)){     /* ຕົກລົງມາຮອດຜິວນ້ຳ */
+                const hit = Math.abs(o.x - hook.x) < BOAT_HALF;
+                o.scored = hit;
+                if(hit){
+                    save.money  += TIER[o.f.t].val;
+                    save.caught += 1;
+                    for(let i=0;i<8;i++) sparkles.push({x:o.x, y:o.y, vx:(Math.random()-.5)*70, vy:-Math.random()*70, life:.6});
+                }else{
+                    splash(o.x, waveY(o.x), 9);
+                }
+            }
+        }
+        if(!live){
+            const got  = tossing.filter(o=>o.scored).length;
+            const gold = tossing.filter(o=>o.scored).reduce((a,o)=>a + TIER[o.f.t].val, 0);
             persist();
-            showPop(amount, hooked.length);
-            hooked = []; fishes = []; mode = 'idle';
+            showPop(gold, got, tossing.length - got);
+            tossing = []; mode = 'idle';
             refreshHud();
         }
     }
@@ -573,6 +616,19 @@ function draw(){
     }
     ctx.stroke();
 
+    /* ໜ້າທີ່ກຳລັງດີ້ນຂຶ້ນຫາເຮືອ */
+    for(const o of tossing){
+        if(o.scored !== null || o.wait > 0) continue;
+        const t = TIER[o.f.t];
+        ctx.save();
+        ctx.translate(o.x, o.y - camY);
+        ctx.rotate(o.rot);
+        const sp = SPRITES.length ? SPRITES[o.f.si % SPRITES.length] : null;
+        if(sp && sp.complete && sp.naturalWidth) drawSprite(sp, t.r);
+        else { ctx.fillStyle = '#e8a6b8'; ctx.beginPath(); ctx.arc(0,0,t.r,0,7); ctx.fill(); }
+        ctx.restore();
+    }
+
     /* ນ້ຳກະເດັນ */
     for(const s of splashes){
         ctx.globalAlpha = Math.max(0, s.life/.85);
@@ -582,6 +638,11 @@ function draw(){
     ctx.globalAlpha = 1;
 
     /* ── ເຮືອ: ລອຍຕາມຄື້ນ ແລະ ອຽງຕາມຄວາມຊັນ ── */
+    if(mode === 'toss'){                     /* ເສັ້ນບອກເຂດຮັບ */
+        const by = waveY(hook.x) - camY;
+        ctx.strokeStyle = 'rgba(245,216,144,.55)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(hook.x - BOAT_HALF, by + 14); ctx.lineTo(hook.x + BOAT_HALF, by + 14); ctx.stroke();
+    }
     drawBoat(hook.x, waveY(hook.x) - camY, Math.atan(waveSlope(hook.x)*8));
 
     /* ຂອບມືດຮອບຈໍ */
