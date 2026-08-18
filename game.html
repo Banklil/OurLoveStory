@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>ຕຶກເບັດຫາເຈົ້າ ♡</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Noto+Sans+Lao:wght@400;600&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/face-girl.webp">
+<link rel="preload" as="image" href="assets/face-boy.webp">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --paper:#f3efe6; --paper-lt:#fbf8f2; --paper-sh:#e3dacb;
+  --maroon:#7a1220; --maroon-lt:#a3283a; --maroon-dk:#570c17;
+  --ink:#3a2b26; --ink-soft:#7b675e;
+  --gold:#c9a84c; --gold-lt:#f5d890;
+}
+html,body{height:100%;overflow:hidden;background:#05021a}
+body{
+  font-family:'Patrick Hand','Noto Sans Lao',cursive;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;-webkit-user-select:none;
+}
+#wrap{position:fixed;inset:0;display:flex;flex-direction:column}
+canvas{flex:1;display:block;width:100%;touch-action:none;cursor:crosshair}
+
+/* ── ແຖບຂໍ້ມູນເທິງ ── */
+.hud{
+  position:absolute;top:0;left:0;right:0;z-index:5;
+  display:flex;gap:8px;align-items:center;
+  padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
+  pointer-events:none;
+}
+.chip{
+  background:rgba(243,239,230,.93);border:2px solid var(--maroon);
+  border-radius:999px;padding:5px 13px;color:var(--ink);
+  font-size:.95rem;line-height:1.25;white-space:nowrap;
+  box-shadow:2px 3px 0 var(--maroon-dk);
+}
+.chip b{color:var(--maroon);font-weight:400}
+.spacer{flex:1}
+.back{
+  pointer-events:auto;text-decoration:none;
+  background:rgba(243,239,230,.93);border:2px solid var(--maroon);
+  border-radius:999px;padding:5px 13px;color:var(--maroon);font-size:.9rem;
+  box-shadow:2px 3px 0 var(--maroon-dk);
+}
+
+/* ── ຄຳແນະນຳກາງຈໍ ── */
+#hint{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  z-index:4;text-align:center;pointer-events:none;
+  font-family:'Caveat','Noto Sans Lao',cursive;
+  color:var(--gold-lt);text-shadow:0 2px 12px rgba(0,0,0,.7);
+  transition:opacity .3s;
+}
+#hint .big{font-size:clamp(1.7rem,7vw,2.6rem);font-weight:700}
+#hint .sm{font-family:'Noto Sans Lao',sans-serif;font-size:.8rem;letter-spacing:.18em;opacity:.75;margin-top:4px}
+#hint.off{opacity:0}
+
+/* ── ຮ້ານອັບເກຣດ ── */
+.shop{
+  position:absolute;left:0;right:0;bottom:0;z-index:6;
+  display:flex;gap:8px;justify-content:center;
+  padding:10px 10px calc(env(safe-area-inset-bottom) + 12px);
+  background:linear-gradient(180deg,transparent,rgba(5,2,26,.85) 45%);
+}
+.up{
+  flex:1 1 0;max-width:150px;
+  background:var(--paper);border:2px solid var(--maroon);border-radius:12px;
+  box-shadow:3px 4px 0 var(--maroon-dk);
+  padding:8px 6px;color:var(--ink);cursor:pointer;
+  font-family:'Patrick Hand','Noto Sans Lao',cursive;font-size:.9rem;
+  transition:transform .12s,opacity .2s;
+}
+.up:active{transform:translateY(2px)}
+.up:disabled{opacity:.45;cursor:default}
+.up .n{display:block;color:var(--maroon);font-size:.95rem}
+.up .lv{display:block;font-size:.72rem;color:var(--ink-soft)}
+.up .c{display:block;margin-top:3px;font-size:.86rem}
+
+/* ── ສະຫຼຸບຫຼັງມ້ວນເບັດຂຶ້ນ ── */
+#pop{
+  position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) scale(.8);
+  z-index:7;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;
+  background:var(--paper);border:2px solid var(--maroon);border-radius:14px;
+  box-shadow:4px 5px 0 var(--maroon-dk);padding:14px 22px;text-align:center;color:var(--ink);
+}
+#pop.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#pop .amt{font-family:'Caveat',cursive;font-size:2rem;color:var(--maroon);line-height:1}
+#pop .sub{font-family:'Noto Sans Lao',sans-serif;font-size:.75rem;color:var(--ink-soft);margin-top:2px}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div class="hud">
+    <div class="chip">💰 <b id="money">0</b></div>
+    <div class="chip">🪝 <b id="depth">0</b> m</div>
+    <div class="chip">💕 <b id="caught">0</b></div>
+    <div class="spacer"></div>
+    <a class="back" href="birthday.html">← ກັບ</a>
+  </div>
+
+  <canvas id="cv"></canvas>
+
+  <div id="hint">
+    <div class="big">ກົດເພື່ອຢ່ອນເບັດ</div>
+    <div class="sm">TAP TO CAST · ເລື່ອນນິ້ວເພື່ອບັງຄັບ</div>
+  </div>
+
+  <div id="pop"><div class="amt" id="pop-amt"></div><div class="sub" id="pop-sub"></div></div>
+
+  <div class="shop">
+    <button class="up" id="up-line">
+      <span class="n">ສາຍເບັດ</span><span class="lv" id="lv-line">Lv 1</span><span class="c" id="c-line">$30</span>
+    </button>
+    <button class="up" id="up-hook">
+      <span class="n">ຂໍເບັດ</span><span class="lv" id="lv-hook">Lv 1</span><span class="c" id="c-hook">$45</span>
+    </button>
+    <button class="up" id="up-reel">
+      <span class="n">ມ້ວນສາຍ</span><span class="lv" id="lv-reel">Lv 1</span><span class="c" id="c-reel">$25</span>
+    </button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ຕຶກເບັດຫາເຈົ້າ — ຢ່ອນເບັດລົງ ເລື່ອນນິ້ວບັງຄັບ ແລ້ວມ້ວນຂຶ້ນ
+   "ປາ" ຄືຮູບໜ້າ: ໜ້າຜູ້ຊາຍ (ນ້ອຍ) ແລະ ໜ້າຜູ້ຍິງ (ໃຫຍ່ ຄ່າສູງກວ່າ)
+   ═══════════════════════════════════════════════════════════ */
+const cv  = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+const IMG = {};
+['girl','boy'].forEach(k=>{
+    const i = new Image();
+    i.src = 'assets/face-' + k + '.webp';
+    IMG[k] = i;
+});
+
+/* ── ບັນທຶກຄວາມຄືບໜ້າ ── */
+const SAVE = 'tuk-bet-save';
+const save = Object.assign(
+    {money:0, caught:0, best:0, line:0, hook:0, reel:0},
+    JSON.parse(localStorage.getItem(SAVE) || '{}')
+);
+const persist = () => { try{ localStorage.setItem(SAVE, JSON.stringify(save)); }catch(e){} };
+
+/* ── ຄ່າອັບເກຣດ ── */
+const UP = {
+    line: {base:30, mul:1.55, of:l=>170 + l*95},      /* ຄວາມເລິກສູງສຸດ (px) */
+    hook: {base:45, mul:1.95, of:l=>1 + l},           /* ຕິດໄດ້ຈັກໜ້າ */
+    reel: {base:25, mul:1.65, of:l=>115 + l*26},      /* ຄວາມໄວມ້ວນ (px/s) */
+};
+const cost  = k => Math.round(UP[k].base * Math.pow(UP[k].mul, save[k]));
+const maxDepth = () => UP.line.of(save.line);
+const capacity = () => UP.hook.of(save.hook);
+const reelSpd  = () => UP.reel.of(save.reel);
+
+/* ── ໜ້າຈໍ ── */
+let W = 0, H = 0, DPR = 1;
+const WATER_Y = 96;                 /* ເສັ້ນນ້ຳ (world = screen ຕອນຢູ່ເທິງ) */
+function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.round(W*DPR); cv.height = Math.round(H*DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+addEventListener('resize', resize);
+
+/* ── ສະຖານະ ── */
+let mode = 'idle';                  /* idle | down | up */
+const hook = {x:0, y:WATER_Y, r:9};
+let pointerX = null;
+let camY = 0;                       /* ກ້ອງເລື່ອນຕາມເບັດຕອນລົງເລິກ */
+let fishes = [];
+let hooked = [];
+let sparkles = [];
+
+/* ── ໜ້າທີ່ລອຍຢູ່ ──
+   ຢູ່ເລິກ = ຄ່າສູງກວ່າ ຈຶ່ງມີເຫດຜົນທີ່ຈະອັບເກຣດສາຍເບັດ */
+function tierFor(depth){
+    const d = depth - WATER_Y;
+    if(d > 420 && Math.random() < .45) return 2;
+    if(d > 180 && Math.random() < .55) return 1;
+    return Math.random() < .25 ? 1 : 0;
+}
+const TIER = [
+    {img:'boy',  r:19, val:1,  spd:26},
+    {img:'girl', r:25, val:4,  spd:34},
+    {img:'girl', r:33, val:12, spd:44},
+];
+
+function spawnField(){
+    fishes = [];
+    const deepest = WATER_Y + maxDepth() + 60;
+    for(let d = WATER_Y + 70; d < deepest; d += 46){
+        const n = 1 + (Math.random() < .5 ? 1 : 0);
+        for(let k = 0; k < n; k++){
+            const t = tierFor(d);
+            fishes.push({
+                x: 30 + Math.random()*(W-60),
+                y: d + (Math.random()*26 - 13),
+                dir: Math.random() < .5 ? -1 : 1,
+                t, caught:false,
+                bob: Math.random()*Math.PI*2,
+            });
+        }
+    }
+}
+
+/* ── ຢ່ອນເບັດ ── */
+function cast(){
+    if(mode !== 'idle') return;
+    mode = 'down';
+    hooked = [];
+    hook.y = WATER_Y;
+    hook.x = pointerX == null ? W/2 : pointerX;
+    spawnField();
+    document.getElementById('hint').classList.add('off');
+}
+
+/* ── ຄວບຄຸມ ── */
+function px(e){
+    const r = cv.getBoundingClientRect();
+    const p = e.touches ? e.touches[0] : e;
+    return p.clientX - r.left;
+}
+cv.addEventListener('pointerdown', e=>{ pointerX = px(e); cast(); });
+cv.addEventListener('pointermove', e=>{ pointerX = px(e); });
+addEventListener('keydown', e=>{ if(e.code === 'Space'){ e.preventDefault(); cast(); } });
+
+/* ── ຮ້ານ ── */
+const shopEls = {
+    line:[document.getElementById('up-line'), document.getElementById('lv-line'), document.getElementById('c-line')],
+    hook:[document.getElementById('up-hook'), document.getElementById('lv-hook'), document.getElementById('c-hook')],
+    reel:[document.getElementById('up-reel'), document.getElementById('lv-reel'), document.getElementById('c-reel')],
+};
+Object.keys(shopEls).forEach(k=>{
+    shopEls[k][0].addEventListener('click', ()=>{
+        const c = cost(k);
+        if(save.money < c || mode !== 'idle') return;
+        save.money -= c; save[k]++;
+        persist(); refreshHud();
+    });
+});
+
+function refreshHud(){
+    document.getElementById('money').textContent  = Math.floor(save.money);
+    document.getElementById('depth').textContent  = Math.round(save.best/10);
+    document.getElementById('caught').textContent = save.caught;
+    Object.keys(shopEls).forEach(k=>{
+        const [btn, lv, c] = shopEls[k];
+        lv.textContent = 'Lv ' + (save[k]+1);
+        c.textContent  = '$' + cost(k);
+        btn.disabled = save.money < cost(k) || mode !== 'idle';
+    });
+}
+
+/* ── ສະຫຼຸບ ── */
+function showPop(amount, n){
+    const p = document.getElementById('pop');
+    document.getElementById('pop-amt').textContent = '+$' + amount;
+    document.getElementById('pop-sub').textContent = n ? ('ຕິດເບັດ ' + n + ' ໜ້າ 💕') : 'ບໍ່ຕິດເລີຍ 🥲';
+    p.classList.add('on');
+    setTimeout(()=>p.classList.remove('on'), 1100);
+}
+
+/* ── ວົງຈອນເກມ ── */
+let last = performance.now();
+function frame(now){
+    const dt = Math.min((now - last)/1000, .05);
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(frame);
+}
+
+function update(dt){
+    const bottom = WATER_Y + maxDepth();
+
+    if(pointerX != null){
+        const target = Math.max(18, Math.min(W-18, pointerX));
+        hook.x += (target - hook.x) * Math.min(1, dt*9);   /* ຕາມນິ້ວແບບນຸ້ມໆ */
+    }
+
+    if(mode === 'down'){
+        hook.y += 150 * dt;
+        if(hook.y >= bottom){ hook.y = bottom; mode = 'up'; }
+    }else if(mode === 'up'){
+        const load = 1 - Math.min(.55, hooked.length * .07);   /* ຕິດຫຼາຍ = ໜັກ = ຊ້າ */
+        hook.y -= reelSpd() * load * dt;
+        if(hook.y <= WATER_Y){
+            hook.y = WATER_Y;
+            const amount = hooked.reduce((s,f)=>s + TIER[f.t].val, 0);
+            save.money  += amount;
+            save.caught += hooked.length;
+            save.best    = Math.max(save.best, Math.round(bottom - WATER_Y));
+            persist();
+            showPop(amount, hooked.length);
+            hooked = []; fishes = []; mode = 'idle';
+            refreshHud();
+        }
+    }
+
+    /* ໜ້າລອຍໄປມາ */
+    for(const f of fishes){
+        if(f.caught) continue;
+        const t = TIER[f.t];
+        f.x += f.dir * t.spd * dt;
+        f.bob += dt*2;
+        if(f.x < t.r + 6){ f.x = t.r + 6; f.dir = 1; }
+        if(f.x > W - t.r - 6){ f.x = W - t.r - 6; f.dir = -1; }
+
+        /* ຕິດເບັດ — ຕິດໄດ້ທັງຕອນລົງ ແລະ ຕອນຂຶ້ນ */
+        if(hooked.length < capacity()){
+            const dx = f.x - hook.x, dy = f.y - hook.y;
+            if(dx*dx + dy*dy < (t.r + hook.r)*(t.r + hook.r)){
+                f.caught = true;
+                hooked.push(f);
+                for(let i=0;i<7;i++) sparkles.push({x:f.x, y:f.y, vx:(Math.random()-.5)*60, vy:(Math.random()-.5)*60, life:.6});
+            }
+        }
+    }
+
+    /* ໜ້າທີ່ຕິດແລ້ວ ຫ້ອຍຕໍ່ກັນເປັນສາຍ */
+    hooked.forEach((f,i)=>{
+        const tx = hook.x, ty = hook.y + 20 + i*17;
+        f.x += (tx - f.x) * Math.min(1, dt*11);
+        f.y += (ty - f.y) * Math.min(1, dt*11);
+    });
+
+    for(const s of sparkles){ s.x += s.vx*dt; s.y += s.vy*dt; s.life -= dt; }
+    sparkles = sparkles.filter(s=>s.life > 0);
+
+    /* ກ້ອງ: ໃຫ້ເບັດຢູ່ປະມານ 45% ຂອງຈໍ ຕອນລົງເລິກ */
+    const want = Math.max(0, hook.y - H*0.45);
+    camY += (want - camY) * Math.min(1, dt*4);
+}
+
+function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    /* ທ້ອງຟ້າ */
+    const sky = ctx.createLinearGradient(0,0,0,WATER_Y - camY);
+    sky.addColorStop(0,'#0b0535'); sky.addColorStop(1,'#241a5c');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, Math.max(0, WATER_Y - camY));
+
+    /* ດວງເດືອນ */
+    if(WATER_Y - camY > 20){
+        ctx.globalAlpha = .85;
+        ctx.fillStyle = '#f5e6b8';
+        ctx.beginPath(); ctx.arc(W - 46, Math.max(18, 40 - camY), 16, 0, 7); ctx.fill();
+        ctx.globalAlpha = 1;
+    }
+
+    /* ນ້ຳ — ຍິ່ງເລິກຍິ່ງມືດ */
+    const top = Math.max(0, WATER_Y - camY);
+    const wat = ctx.createLinearGradient(0, top, 0, H);
+    wat.addColorStop(0,'#2a6f8f'); wat.addColorStop(.45,'#154a67'); wat.addColorStop(1,'#06182b');
+    ctx.fillStyle = wat;
+    ctx.fillRect(0, top, W, H - top);
+
+    /* ເສັ້ນນ້ຳ */
+    ctx.strokeStyle = 'rgba(245,216,144,.5)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, top); ctx.lineTo(W, top); ctx.stroke();
+
+    /* ຂີດຄວາມເລິກທຸກ 10 m */
+    ctx.font = '11px "Noto Sans Lao", sans-serif';
+    for(let d = 100; d < maxDepth() + 200; d += 100){
+        const y = WATER_Y + d - camY;
+        if(y < top || y > H) continue;
+        ctx.strokeStyle = 'rgba(255,255,255,.09)';
+        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,.28)';
+        ctx.fillText((d/10) + ' m', 8, y - 4);
+    }
+
+    /* ສາຍເບັດ */
+    ctx.strokeStyle = 'rgba(245,240,225,.75)'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(hook.x, top);
+    ctx.lineTo(hook.x, hook.y - camY);
+    ctx.stroke();
+
+    /* ເຮືອ — ຢູ່ເສັ້ນນ້ຳ ຕາມແນວສາຍເບັດ ໜ້າທີ່ຕິດຂຶ້ນມາຈະລົງເຮືອລຳນີ້ */
+    drawBoat(hook.x, top);
+
+    /* ໜ້າທີ່ຍັງລອຍ */
+    for(const f of fishes){
+        if(f.caught) continue;
+        drawFace(f, f.y - camY + Math.sin(f.bob)*3);
+    }
+    /* ໜ້າທີ່ຕິດເບັດ */
+    for(const f of hooked) drawFace(f, f.y - camY);
+
+    /* ຫົວເບັດ */
+    const hy = hook.y - camY;
+    ctx.fillStyle = '#f3efe6';
+    ctx.beginPath(); ctx.arc(hook.x, hy, hook.r*.55, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#f3efe6'; ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.arc(hook.x, hy + 5, 6, Math.PI*.15, Math.PI*.95); ctx.stroke();
+
+    /* ປະກາຍຕອນຕິດເບັດ */
+    for(const s of sparkles){
+        ctx.globalAlpha = Math.max(0, s.life/.6);
+        ctx.fillStyle = '#ffd9e8';
+        ctx.beginPath(); ctx.arc(s.x, s.y - camY, 2.4, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    /* ຈຳນວນທີ່ຕິດ / ຄວາມຈຸ */
+    if(mode !== 'idle'){
+        ctx.font = '13px "Patrick Hand", cursive';
+        ctx.fillStyle = 'rgba(255,255,255,.8)';
+        ctx.fillText(hooked.length + ' / ' + capacity(), hook.x + 14, hy - 10);
+    }
+}
+
+function drawBoat(bx, by){
+    ctx.save();
+    ctx.translate(bx, by);
+    /* ຕົວເຮືອ */
+    ctx.fillStyle = '#7a1220';
+    ctx.beginPath();
+    ctx.moveTo(-34, -6); ctx.lineTo(34, -6);
+    ctx.quadraticCurveTo(26, 12, 0, 12);
+    ctx.quadraticCurveTo(-26, 12, -34, -6);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#f3efe6';
+    ctx.fillRect(-34, -9, 68, 4);
+    /* ເສົາ + ທຸງຫົວໃຈ */
+    ctx.strokeStyle = '#f3efe6'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, -9); ctx.lineTo(0, -30); ctx.stroke();
+    ctx.fillStyle = '#e8a6b8';
+    ctx.beginPath(); ctx.moveTo(1, -30); ctx.lineTo(17, -24); ctx.lineTo(1, -18); ctx.closePath(); ctx.fill();
+    ctx.restore();
+}
+
+function drawFace(f, screenY){
+    const t = TIER[f.t];
+    const img = IMG[t.img];
+    if(screenY < -60 || screenY > H + 60) return;
+    if(t.val >= 12){                       /* ໜ້າຫາຍາກ — ມີແສງ */
+        ctx.globalAlpha = .5;
+        ctx.fillStyle = '#f5d890';
+        ctx.beginPath(); ctx.arc(f.x, screenY, t.r + 7, 0, 7); ctx.fill();
+        ctx.globalAlpha = 1;
+    }
+    if(img && img.complete && img.naturalWidth){
+        ctx.drawImage(img, f.x - t.r, screenY - t.r, t.r*2, t.r*2);
+    }else{
+        ctx.fillStyle = '#e8a6b8';
+        ctx.beginPath(); ctx.arc(f.x, screenY, t.r, 0, 7); ctx.fill();
+    }
+}
+
+resize();
+refreshHud();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
