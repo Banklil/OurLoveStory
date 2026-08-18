@@ -543,6 +543,37 @@ body.can-edit .sv-edit{display:flex}
 }
 .hero-plaque-sub{font-size:.72rem;color:var(--ink-soft);letter-spacing:.16em;margin-top:2px}
 
+/* ── ຂູດຮູບ: ຊັ້ນປົກເທິງຮູບເດັ່ນ ຂູດອອກເພື່ອເປີດເບິ່ງ ── */
+.scratch{
+  position:absolute;left:0;top:0;width:100%;height:100%;
+  z-index:3;cursor:grab;touch-action:none;
+  transition:opacity .8s ease;
+}
+.scratch:active{cursor:grabbing}
+.hero-wrap.revealed .scratch{opacity:0;pointer-events:none}
+.scratch-tip{
+  position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);
+  z-index:4;white-space:nowrap;pointer-events:none;
+  font-family:'Caveat','Noto Serif Lao',cursive;font-size:1.15rem;
+  color:var(--gold-lt);text-shadow:0 2px 10px rgba(0,0,0,.6);
+  animation:tipPulse 1.9s ease-in-out infinite;
+}
+.hero-wrap.revealed .scratch-tip{opacity:0;transition:opacity .5s}
+@keyframes tipPulse{0%,100%{opacity:.65}50%{opacity:1}}
+
+/* ດາວທີ່ກະເດັນອອກຕອນຂູດ */
+.spark{
+  position:absolute;pointer-events:none;z-index:5;
+  color:var(--gold-lt);font-size:13px;line-height:1;
+  text-shadow:0 0 8px rgba(245,216,144,.9);
+  animation:sparkOut .7s ease-out forwards;
+}
+@keyframes sparkOut{
+  0%  {opacity:1;transform:translate(-50%,-50%) scale(.4) rotate(0deg)}
+  60% {opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(90deg)}
+  100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.5) rotate(180deg)}
+}
+
 /* ══════════════ SECTION 4: GALLERY ══════════════ */
 .gallery-section{padding:64px 14px 56px;position:relative}
 .gallery-section::before{
@@ -1056,6 +1087,8 @@ body.can-edit .lb-note-text{display:none}
                preserveAspectRatio="xMidYMid slice" clip-path="url(#scallopClip)"/>
         <use href="#scallopPath" class="sc-stroke" fill="none" stroke="#7a1220" stroke-width="4.5" stroke-linejoin="round"/>
       </svg>
+      <canvas class="scratch" id="scratch"></canvas>
+      <div class="scratch-tip" id="scratch-tip">✦ ຂູດເບິ່ງ ✦</div>
     </div>
     <div class="hero-plaque">
       <div class="hero-plaque-title">ຊ່ວງເວລາທີ່ດີທີ່ສຸດ</div>
@@ -1295,6 +1328,125 @@ const CFG = {
 
     envBtn.addEventListener('click', openGate);
     if(ltBtn) ltBtn.addEventListener('click', closeLetter);
+})();
+
+/* ─── ✦ ຂູດຮູບເດັ່ນ ✦ ───
+   ຊັ້ນປົກແຕ້ມດ້ວຍເສັ້ນຂອບຫຍັກອັນດຽວກັບຮູບ (scallopPath) ຈຶ່ງພໍດີທຸກຂະໜາດຈໍ.
+   ຂູດ = ລຶບດ້ວຍ destination-out. ພໍຂູດໄດ້ 55% ມັນເປີດເອງໝົດ. */
+(function(){
+    const wrap = document.querySelector('.hero-wrap');
+    const cvs  = document.getElementById('scratch');
+    const svg  = document.querySelector('.hero-scallop');
+    const pathEl = document.getElementById('scallopPath');
+    if(!wrap || !cvs || !svg || !pathEl) return;
+
+    const ctx = cvs.getContext('2d', {willReadFrequently:true});
+    const D = pathEl.getAttribute('d');
+    let dpr = 1, done = false, lastCheck = 0;
+
+    function paintCover(){
+        const w = svg.clientWidth, h = svg.clientHeight;
+        if(!w || !h) return false;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cvs.width  = Math.round(w*dpr);
+        cvs.height = Math.round(h*dpr);
+        cvs.style.width = w + 'px';
+        cvs.style.height = h + 'px';
+
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        ctx.clearRect(0,0,w,h);
+
+        /* viewBox ຂອງ svg ແມ່ນ "-4 -4 308 388" */
+        const k = w/308;
+        ctx.save();
+        ctx.scale(k,k);
+        ctx.translate(4,4);
+        const path = new Path2D(D);
+        ctx.clip(path);
+
+        const g = ctx.createLinearGradient(0,0,300,380);
+        g.addColorStop(0,'#c9a84c'); g.addColorStop(.35,'#8d7a3a');
+        g.addColorStop(.55,'#e2cf8d'); g.addColorStop(1,'#7d6a2f');
+        ctx.fillStyle = g; ctx.fillRect(0,0,300,380);
+
+        /* ລາຍຂູດຈາງໆ ໃຫ້ຄືແຜ່ນຂູດຈິງ */
+        ctx.globalAlpha = .13; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+        for(let i=-380;i<300;i+=9){
+            ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+380,380); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+
+        ctx.fillStyle = 'rgba(70,54,20,.85)';
+        ctx.font = '700 26px Caveat, cursive';
+        ctx.textAlign = 'center';
+        ctx.fillText('✦ ຂູດເບິ່ງ ✦', 150, 196);
+        ctx.restore();
+        return true;
+    }
+
+    function spark(x, y){
+        const s = document.createElement('span');
+        s.className = 'spark';
+        s.textContent = Math.random() < .5 ? '✦' : '✧';
+        s.style.left = x + 'px';
+        s.style.top  = y + 'px';
+        s.style.setProperty('--dx', ((Math.random()-.5)*54).toFixed(0) + 'px');
+        s.style.setProperty('--dy', (-24 - Math.random()*38).toFixed(0) + 'px');
+        s.style.fontSize = (10 + Math.random()*9).toFixed(0) + 'px';
+        wrap.appendChild(s);
+        setTimeout(()=>s.remove(), 720);
+    }
+
+    function progress(){
+        const {width:w, height:h} = cvs;
+        if(!w || !h) return 0;
+        const d = ctx.getImageData(0,0,w,h).data;
+        let clear = 0, total = 0;
+        for(let i=3; i<d.length; i += 4*11){    /* ສຸ່ມທຸກໆ 11 px ພໍແລ້ວ */
+            total++;
+            if(d[i] < 24) clear++;
+        }
+        return total ? clear/total : 0;
+    }
+
+    let scratching = false;
+    function at(e){
+        const r = cvs.getBoundingClientRect();
+        const p = e.touches ? e.touches[0] : e;
+        return {x: p.clientX - r.left, y: p.clientY - r.top};
+    }
+    function rub(e){
+        if(done) return;
+        const {x,y} = at(e);
+        ctx.save();
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath(); ctx.arc(x, y, 21, 0, 7); ctx.fill();
+        ctx.restore();
+        if(Math.random() < .5) spark(x, y);
+
+        const now = performance.now();
+        if(now - lastCheck > 380){
+            lastCheck = now;
+            if(progress() > .55){
+                done = true;
+                wrap.classList.add('revealed');
+                for(let i=0;i<16;i++){
+                    setTimeout(()=>spark(Math.random()*cvs.clientWidth, Math.random()*cvs.clientHeight), i*45);
+                }
+            }
+        }
+    }
+
+    cvs.addEventListener('pointerdown', e=>{ scratching = true; cvs.setPointerCapture(e.pointerId); rub(e); });
+    cvs.addEventListener('pointermove', e=>{ if(scratching) rub(e); });
+    addEventListener('pointerup',   ()=>{ scratching = false; });
+    addEventListener('pointercancel',()=>{ scratching = false; });
+
+    /* ຮູບ svg ອາດຍັງບໍ່ທັນມີຂະໜາດຕອນ script ແລ່ນ */
+    function init(){ if(!paintCover()) setTimeout(init, 120); }
+    init();
+    addEventListener('resize', ()=>{ if(!done) paintCover(); });
 })();
 
 /* ─── WHATSAPP LINK ─── */
