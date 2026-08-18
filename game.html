@@ -139,6 +139,37 @@ const IMG = {};
     IMG[k] = i;
 });
 
+/* ── ດຶງຮູບຈາກ Supabase ມາໃຊ້ເປັນ "ປາ" ──
+   ຖ້າດຶງບໍ່ໄດ້ ຈະຕົກມາໃຊ້ຮູບໜ້າສອງໃບໃນ assets/ ແທນ ເກມຈຶ່ງຫຼິ້ນໄດ້ຢູ່ດີ */
+const SB_URL = 'https://fxhmjhwhpbvtflrhsofq.supabase.co';
+const SB_KEY = 'sb_publishable_sEN55L7TBNlWnsXd3_cnfg_6t3_p0w9';
+let SPRITES = [];
+fetch(SB_URL + '/rest/v1/photos?select=image_url&order=created_at.asc',
+      {headers:{apikey:SB_KEY, Authorization:'Bearer ' + SB_KEY}})
+  .then(r => r.json())
+  .then(rows => {
+      (rows || []).forEach(row => {
+          if(!row.image_url) return;
+          const im = new Image();
+          im.src = row.image_url;
+          SPRITES.push(im);
+      });
+  })
+  .catch(() => {});
+
+/* ວາດຮູບເປັນວົງມົນ ພ້ອມຂອບເຈ້ຍ */
+function drawSprite(img, r){
+    ctx.save();
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.clip();
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    const sc = Math.max(2*r/iw, 2*r/ih);      /* ເຕັມວົງ ບໍ່ໃຫ້ຢືດ */
+    ctx.drawImage(img, -iw*sc/2, -ih*sc/2, iw*sc, ih*sc);
+    ctx.restore();
+    const lw = Math.max(2, r*0.15);
+    ctx.strokeStyle = 'rgba(253,246,234,.95)'; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.arc(0, 0, r - lw/2, 0, 7); ctx.stroke();
+}
+
 /* ── ບັນທຶກຄວາມຄືບໜ້າ ── */
 const SAVE = 'tuk-bet-save';
 const save = Object.assign(
@@ -149,7 +180,7 @@ const persist = () => { try{ localStorage.setItem(SAVE, JSON.stringify(save)); }
 
 /* ── ຄ່າອັບເກຣດ ── */
 const UP = {
-    line: {base:30, mul:1.55, of:l=>170 + l*95},      /* ຄວາມເລິກສູງສຸດ (px) */
+    line: {base:30, mul:1.55, of:l=>400 + l*120},     /* ຄວາມເລິກ: ເລີ່ມ 40 m (px/10 = m) */
     hook: {base:45, mul:1.95, of:l=>1 + l},           /* ຕິດໄດ້ຈັກໜ້າ */
     reel: {base:25, mul:1.65, of:l=>115 + l*26},      /* ຄວາມໄວມ້ວນ (px/s) */
 };
@@ -204,6 +235,7 @@ function spawnField(){
                 y: d + (Math.random()*26 - 13),
                 dir: Math.random() < .5 ? -1 : 1,
                 t, caught:false,
+                si: (Math.random()*1000)|0,        /* ຮູບຂອງໂຕນີ້ */
                 bob: Math.random()*Math.PI*2,
             });
         }
@@ -267,6 +299,43 @@ function showPop(amount, n){
     setTimeout(()=>p.classList.remove('on'), 1100);
 }
 
+/* ── ຄື້ນນ້ຳ ──
+   ຜິວນ້ຳເປັນຜົນລວມຂອງສອງຄື້ນຄວາມຖີ່ຕ່າງກັນ ຈຶ່ງບໍ່ເປັນຈັງຫວະຊ້ຳໆ */
+let T = 0;
+function waveY(x){
+    return WATER_Y
+         + Math.sin(x*0.028 + T*1.6)*3.2
+         + Math.sin(x*0.011 - T*1.05)*1.9;
+}
+function waveSlope(x){
+    return Math.cos(x*0.028 + T*1.6)*3.2*0.028
+         + Math.cos(x*0.011 - T*1.05)*1.9*0.011;
+}
+
+let bubbles = [], motes = [], splashes = [];
+let prevHookY = WATER_Y;
+
+/* ຝຸ່ນນ້ຳ — ຈຸດນ້ອຍໆລອຍຊ້າໆ ຊ່ວຍໃຫ້ຮູ້ສຶກເຖິງຄວາມເລິກ ແລະ ການເຄື່ອນໄຫວ */
+function initMotes(){
+    motes = [];
+    for(let i=0;i<80;i++) motes.push({
+        x: Math.random()*W,
+        y: WATER_Y + Math.random()*1600,
+        r: .5 + Math.random()*1.5,
+        sp: 3 + Math.random()*9,
+        ph: Math.random()*6.3,
+    });
+}
+
+function splash(x, y, n){
+    for(let i=0;i<n;i++) splashes.push({
+        x, y,
+        vx: (Math.random()-.5)*130,
+        vy: -40 - Math.random()*120,
+        life: .5 + Math.random()*.35,
+    });
+}
+
 /* ── ວົງຈອນເກມ ── */
 let last = performance.now();
 function frame(now){
@@ -279,6 +348,34 @@ function frame(now){
 
 function update(dt){
     const bottom = WATER_Y + maxDepth();
+    T += dt;
+
+    /* ນ້ຳກະເດັນຕອນເບັດຕັດຜິວນ້ຳ */
+    if(prevHookY < WATER_Y && hook.y >= WATER_Y) splash(hook.x, WATER_Y, 14);
+    prevHookY = hook.y;
+
+    if(!motes.length) initMotes();
+
+    if(Math.random() < dt*9){
+        bubbles.push({
+            x: Math.random()*W,
+            y: WATER_Y + 140 + Math.random()*(maxDepth()+200),
+            r: 1.3 + Math.random()*3,
+            sp: 16 + Math.random()*30,
+            ph: Math.random()*6.3,
+        });
+    }
+    for(const b of bubbles){ b.y -= b.sp*dt; b.x += Math.sin(T*2 + b.ph)*.4; }
+    bubbles = bubbles.filter(b => b.y > WATER_Y - 12);
+
+    for(const m of motes){
+        m.y -= m.sp*dt*.3;
+        m.x += Math.sin(T*.6 + m.ph)*.2;
+        if(m.y < WATER_Y) { m.y = WATER_Y + 1600; m.x = Math.random()*W; }
+    }
+
+    for(const s of splashes){ s.x += s.vx*dt; s.y += s.vy*dt; s.vy += 420*dt; s.life -= dt; }
+    splashes = splashes.filter(s => s.life > 0);
 
     if(pointerX != null){
         const target = Math.max(18, Math.min(W-18, pointerX));
@@ -341,66 +438,114 @@ function update(dt){
 
 function draw(){
     ctx.clearRect(0,0,W,H);
+    const top = Math.max(0, WATER_Y - camY);
 
-    /* ທ້ອງຟ້າ */
-    const sky = ctx.createLinearGradient(0,0,0,WATER_Y - camY);
-    sky.addColorStop(0,'#0b0535'); sky.addColorStop(1,'#241a5c');
+    /* ── ທ້ອງຟ້າ ── */
+    const sky = ctx.createLinearGradient(0,0,0,Math.max(1, top));
+    sky.addColorStop(0,'#080330'); sky.addColorStop(1,'#2b1f63');
     ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, W, Math.max(0, WATER_Y - camY));
+    ctx.fillRect(0, 0, W, Math.max(0, top));
 
-    /* ດວງເດືອນ */
-    if(WATER_Y - camY > 20){
-        ctx.globalAlpha = .85;
-        ctx.fillStyle = '#f5e6b8';
-        ctx.beginPath(); ctx.arc(W - 46, Math.max(18, 40 - camY), 16, 0, 7); ctx.fill();
+    if(top > 12){
+        /* ດາວ */
+        ctx.fillStyle = 'rgba(255,255,255,.65)';
+        for(let i=0;i<26;i++){
+            const sx = (i*97 % W), sy = (i*53 % Math.max(1, top-6)) + 3;
+            const tw = .35 + .65*Math.abs(Math.sin(T*1.4 + i));
+            ctx.globalAlpha = tw*.7;
+            ctx.fillRect(sx, sy, 1.6, 1.6);
+        }
+        ctx.globalAlpha = 1;
+        /* ດວງເດືອນ */
+        ctx.fillStyle = '#f7ead0';
+        ctx.beginPath(); ctx.arc(W-48, Math.min(top-14, 40), 15, 0, 7); ctx.fill();
+        ctx.globalAlpha = .18; ctx.beginPath(); ctx.arc(W-48, Math.min(top-14, 40), 27, 0, 7); ctx.fill();
         ctx.globalAlpha = 1;
     }
 
-    /* ນ້ຳ — ຍິ່ງເລິກຍິ່ງມືດ */
-    const top = Math.max(0, WATER_Y - camY);
+    /* ── ຜິວນ້ຳເປັນຄື້ນ ── */
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    ctx.lineTo(0, waveY(0) - camY);
+    for(let x=0; x<=W; x+=6) ctx.lineTo(x, waveY(x) - camY);
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.clip();
+
     const wat = ctx.createLinearGradient(0, top, 0, H);
-    wat.addColorStop(0,'#2a6f8f'); wat.addColorStop(.45,'#154a67'); wat.addColorStop(1,'#06182b');
+    wat.addColorStop(0,'#3f8fae'); wat.addColorStop(.28,'#1d6285');
+    wat.addColorStop(.62,'#0e3a55'); wat.addColorStop(1,'#03101d');
     ctx.fillStyle = wat;
-    ctx.fillRect(0, top, W, H - top);
+    ctx.fillRect(0, top-20, W, H);
 
-    /* ເສັ້ນນ້ຳ */
-    ctx.strokeStyle = 'rgba(245,216,144,.5)'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(0, top); ctx.lineTo(W, top); ctx.stroke();
+    /* ແສງລອດຜິວນ້ຳ */
+    ctx.globalCompositeOperation = 'lighter';
+    for(let i=0;i<5;i++){
+        const bx = ((i*W/5) + Math.sin(T*.35 + i)*40 + W) % W;
+        const sway = Math.sin(T*.5 + i*1.7)*26;
+        ctx.globalAlpha = .045 + .02*Math.sin(T*.8 + i);
+        ctx.fillStyle = '#bfe8ff';
+        ctx.beginPath();
+        ctx.moveTo(bx-16, top);
+        ctx.lineTo(bx+16, top);
+        ctx.lineTo(bx+70+sway, H);
+        ctx.lineTo(bx-70+sway, H);
+        ctx.closePath(); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
 
-    /* ຂີດຄວາມເລິກທຸກ 10 m */
+    /* ຝຸ່ນນ້ຳ */
+    ctx.fillStyle = 'rgba(210,238,255,.30)';
+    for(const m of motes){
+        const y = m.y - camY;
+        if(y < top || y > H) continue;
+        ctx.beginPath(); ctx.arc(m.x, y, m.r, 0, 7); ctx.fill();
+    }
+
+    /* ຂີດຄວາມເລິກ */
     ctx.font = '11px "Noto Sans Lao", sans-serif';
-    for(let d = 100; d < maxDepth() + 200; d += 100){
+    for(let d = 100; d < maxDepth() + 300; d += 100){
         const y = WATER_Y + d - camY;
         if(y < top || y > H) continue;
-        ctx.strokeStyle = 'rgba(255,255,255,.09)';
+        ctx.strokeStyle = 'rgba(255,255,255,.07)'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
-        ctx.fillStyle = 'rgba(255,255,255,.28)';
+        ctx.fillStyle = 'rgba(255,255,255,.24)';
         ctx.fillText((d/10) + ' m', 8, y - 4);
     }
 
-    /* ສາຍເບັດ */
-    ctx.strokeStyle = 'rgba(245,240,225,.75)'; ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(hook.x, top);
-    ctx.lineTo(hook.x, hook.y - camY);
-    ctx.stroke();
+    /* ຟອງອາກາດ */
+    for(const b of bubbles){
+        const y = b.y - camY;
+        if(y < top || y > H) continue;
+        ctx.strokeStyle = 'rgba(215,245,255,.5)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(b.x, y, b.r, 0, 7); ctx.stroke();
+        ctx.fillStyle = 'rgba(235,250,255,.16)';
+        ctx.beginPath(); ctx.arc(b.x, y, b.r, 0, 7); ctx.fill();
+    }
 
-    /* ເຮືອ — ຢູ່ເສັ້ນນ້ຳ ຕາມແນວສາຍເບັດ ໜ້າທີ່ຕິດຂຶ້ນມາຈະລົງເຮືອລຳນີ້ */
-    drawBoat(hook.x, top);
+    /* ── ສາຍເບັດ: ໂຄ້ງອ່ອນໆ ບໍ່ແມ່ນເສັ້ນຊື່ ── */
+    const surfY = waveY(hook.x) - camY;
+    const hy = hook.y - camY;
+    const sag = Math.sin(T*1.3)*3 + (mode === 'up' ? 5 : mode === 'down' ? -4 : 0);
+    ctx.strokeStyle = 'rgba(248,244,232,.7)'; ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(hook.x, surfY);
+    ctx.quadraticCurveTo(hook.x + sag, (surfY + hy)/2, hook.x, hy);
+    ctx.stroke();
 
     /* ໜ້າທີ່ຍັງລອຍ */
     for(const f of fishes){
         if(f.caught) continue;
         drawFace(f, f.y - camY + Math.sin(f.bob)*3);
     }
-    /* ໜ້າທີ່ຕິດເບັດ */
     for(const f of hooked) drawFace(f, f.y - camY);
 
     /* ຫົວເບັດ */
-    const hy = hook.y - camY;
-    ctx.fillStyle = '#f3efe6';
-    ctx.beginPath(); ctx.arc(hook.x, hy, hook.r*.55, 0, 7); ctx.fill();
-    ctx.strokeStyle = '#f3efe6'; ctx.lineWidth = 2.4;
+    ctx.fillStyle = '#f6f2e6';
+    ctx.beginPath(); ctx.arc(hook.x, hy, hook.r*.5, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#e9e2cc'; ctx.lineWidth = 2.2;
     ctx.beginPath(); ctx.arc(hook.x, hy + 5, 6, Math.PI*.15, Math.PI*.95); ctx.stroke();
 
     /* ປະກາຍຕອນຕິດເບັດ */
@@ -410,18 +555,52 @@ function draw(){
         ctx.beginPath(); ctx.arc(s.x, s.y - camY, 2.4, 0, 7); ctx.fill();
     }
     ctx.globalAlpha = 1;
+    ctx.restore();          /* ສຸດເຂດນ້ຳ */
+
+    /* ── ຟອງຂາວຕາມສັນຄື້ນ ── */
+    ctx.strokeStyle = 'rgba(226,246,255,.75)'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    for(let x=0; x<=W; x+=6){
+        const y = waveY(x) - camY;
+        x === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for(let x=0; x<=W; x+=6){
+        const y = waveY(x) - camY + 4;
+        x === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    /* ນ້ຳກະເດັນ */
+    for(const s of splashes){
+        ctx.globalAlpha = Math.max(0, s.life/.85);
+        ctx.fillStyle = '#dff2ff';
+        ctx.beginPath(); ctx.arc(s.x, s.y - camY, 2, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    /* ── ເຮືອ: ລອຍຕາມຄື້ນ ແລະ ອຽງຕາມຄວາມຊັນ ── */
+    drawBoat(hook.x, waveY(hook.x) - camY, Math.atan(waveSlope(hook.x)*8));
+
+    /* ຂອບມືດຮອບຈໍ */
+    const vig = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*.35, W/2, H/2, Math.max(W,H)*.75);
+    vig.addColorStop(0,'rgba(0,0,0,0)'); vig.addColorStop(1,'rgba(0,0,0,.45)');
+    ctx.fillStyle = vig; ctx.fillRect(0,0,W,H);
 
     /* ຈຳນວນທີ່ຕິດ / ຄວາມຈຸ */
     if(mode !== 'idle'){
         ctx.font = '13px "Patrick Hand", cursive';
-        ctx.fillStyle = 'rgba(255,255,255,.8)';
+        ctx.fillStyle = 'rgba(255,255,255,.85)';
         ctx.fillText(hooked.length + ' / ' + capacity(), hook.x + 14, hy - 10);
     }
 }
 
-function drawBoat(bx, by){
+function drawBoat(bx, by, tilt){
     ctx.save();
     ctx.translate(bx, by);
+    ctx.rotate(tilt || 0);
     /* ຕົວເຮືອ */
     ctx.fillStyle = '#7a1220';
     ctx.beginPath();
@@ -443,18 +622,43 @@ function drawFace(f, screenY){
     const t = TIER[f.t];
     const img = IMG[t.img];
     if(screenY < -60 || screenY > H + 60) return;
-    if(t.val >= 12){                       /* ໜ້າຫາຍາກ — ມີແສງ */
-        ctx.globalAlpha = .5;
+
+    ctx.save();
+    ctx.translate(f.x, screenY);
+    ctx.rotate(Math.sin(f.bob)*0.13);          /* ແກວ່ງເບົາໆ ຄືກຳລັງລອຍ */
+
+    if(t.val >= 12){                            /* ໜ້າຫາຍາກ — ມີແສງ */
+        ctx.globalAlpha = .38 + .12*Math.sin(T*3 + f.bob);
         ctx.fillStyle = '#f5d890';
-        ctx.beginPath(); ctx.arc(f.x, screenY, t.r + 7, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, t.r + 8, 0, 7); ctx.fill();
         ctx.globalAlpha = 1;
     }
-    if(img && img.complete && img.naturalWidth){
-        ctx.drawImage(img, f.x - t.r, screenY - t.r, t.r*2, t.r*2);
+
+    /* ເງົາໃຕ້ໜ້າ ໃຫ້ຮູ້ສຶກມີນ້ຳໜັກ */
+    ctx.globalAlpha = .22;
+    ctx.fillStyle = '#02121f';
+    ctx.beginPath(); ctx.ellipse(2, 4, t.r*.95, t.r*.9, 0, 0, 7); ctx.fill();
+    ctx.globalAlpha = 1;
+
+    const pool = SPRITES.length ? SPRITES[f.si % SPRITES.length] : null;
+    if(pool && pool.complete && pool.naturalWidth){
+        drawSprite(pool, t.r);
+    }else if(img && img.complete && img.naturalWidth){
+        ctx.drawImage(img, -t.r, -t.r, t.r*2, t.r*2);
     }else{
         ctx.fillStyle = '#e8a6b8';
-        ctx.beginPath(); ctx.arc(f.x, screenY, t.r, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, t.r, 0, 7); ctx.fill();
     }
+
+    /* ຍິ່ງເລິກຍິ່ງມືດ — ນ້ຳກືນແສງ */
+    const fog = Math.min(.5, Math.max(0, (f.y - WATER_Y - 160)/1500));
+    if(fog > .01){
+        ctx.globalAlpha = fog;
+        ctx.fillStyle = '#04182b';
+        ctx.beginPath(); ctx.arc(0, 0, t.r, 0, 7); ctx.fill();
+        ctx.globalAlpha = 1;
+    }
+    ctx.restore();
 }
 
 resize();
