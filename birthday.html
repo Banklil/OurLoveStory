@@ -612,6 +612,11 @@ body.can-edit .sv-edit{display:flex}
   touch-action:none;
 }
 .spf-wrap.vis{opacity:1}
+/* ຈໍສຳຜັດ: touch-action:none ຈະກິນທັງການເລື່ອນໜ້າ ແລະ ການກົດ
+   ໃນມືຖືຈຶ່ງໃຫ້ກາດເປັນປຸ່ມກົດທຳມະດາ ບໍ່ຕ້ອງລາກ */
+@media(hover:none),(pointer:coarse){
+  .spf-wrap{touch-action:manipulation;cursor:pointer}
+}
 .spf-wrap.dragging{
   cursor:grabbing !important;
   transition:none;
@@ -855,10 +860,20 @@ body.can-edit .lb-note-text{display:none}
   font-size:.7rem;line-height:1.4;color:var(--ink-soft);
 }
 @media(max-width:860px){
-  .lb-inner{flex-direction:column;gap:12px}
-  .lb-inner img{max-width:92vw;max-height:50vh}
-  .lb-note{width:min(92vw,520px);max-height:32vh;padding:14px}
+  /* ໃນມືຖື ຮູບ+ຄຳອະທິບາຍ ສູງກວ່າຈໍ ກ່ອງຈຶ່ງລົ້ນອອກ
+     ແລະ ປຸ່ມ ✕ (top:-38px) ຫຼຸດຂຶ້ນເໜືອຈໍຈົນກົດບໍ່ໄດ້ */
+  .lightbox{align-items:flex-start;overflow-y:auto;padding:58px 0 26px}
+  .lb-inner{flex-direction:column;gap:12px;margin:auto}
+  .lb-inner img{max-width:92vw;max-height:46vh}
+  .lb-note{width:min(92vw,520px);max-height:none;padding:14px}
   .lb-note-edit textarea{min-height:110px}
+  /* ຕິດປຸ່ມປິດໄວ້ມຸມຈໍ ແລະ ຂະຫຍາຍບ່ອນກົດໃຫ້ນິ້ວແຕະຖືກ */
+  .lb-close{
+    position:fixed;top:10px;right:10px;z-index:2;
+    width:44px;height:44px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(0,0,0,.55);opacity:1;
+  }
 }
 
 /* ══════════════ NAV LINK ══════════════ */
@@ -2176,12 +2191,20 @@ window.addEventListener('touchmove',_onPointerMove,{passive:false});
 window.addEventListener('mouseup',_onPointerUp);
 window.addEventListener('touchend',_onPointerUp);
 
+/* ລາກກາດໄດ້ສະເພາະເຄື່ອງທີ່ມີເມົ້າ.
+   ໃນມືຖື e.preventDefault() ຕອນ touchstart ຈະລົບ click ຖິ້ມ
+   ກົດຮູບຈຶ່ງບໍ່ເປີດ ແລະ ຍັງເລື່ອນໜ້າຜ່ານຫ້ອງພາບບໍ່ໄດ້ນຳ */
+const _canDrag = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+
 function makeDraggable(wrap, onClickFn){
+    if(!_canDrag){                       /* ຈໍສຳຜັດ: ກົດເປີດຢ່າງດຽວ */
+        wrap.addEventListener('click', onClickFn);
+        return;
+    }
     function start(e){
         if(e.button&&e.button!==0) return;
-        const t=e.touches?e.touches[0]:e;
         _dragEl=wrap; _dragMoved=false;
-        _dragSX=t.clientX; _dragSY=t.clientY;
+        _dragSX=e.clientX; _dragSY=e.clientY;
         _dragOL=parseInt(wrap.style.left)||0;
         _dragOT=parseInt(wrap.style.top)||0;
         wrap.style.zIndex=++_dragZ;
@@ -2189,7 +2212,6 @@ function makeDraggable(wrap, onClickFn){
         e.preventDefault();
     }
     wrap.addEventListener('mousedown',start);
-    wrap.addEventListener('touchstart',start,{passive:false});
     wrap.addEventListener('click',()=>{ if(!_dragMoved) onClickFn(); });
 }
 
@@ -2272,8 +2294,7 @@ async function loadSpaceGallery(){
 
             /* drag */
             makeDraggable(wrap, ()=>openLB(photo.image_url, photo));
-            wrap.addEventListener('mousedown',function(){ userMoved=true; });
-            wrap.addEventListener('touchstart',function(){ userMoved=true; },{passive:true});
+            if(_canDrag) wrap.addEventListener('mousedown',function(){ userMoved=true; });
 
             wraps.push(wrap);
             const im=inner.querySelector('img');
